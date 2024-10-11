@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage do Projeto</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/Home.css') }}">
+</head>
+<body>
+  
+    <main>
+      {% include 'components/header.html' %}
+      
+      <!-- Seção do vídeo -->
+      <section class="video-section">
+        <h2>Braço Robótico em Ação</h2>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/seu_video_id" 
+                  frameborder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowfullscreen>
+          </iframe>
+        </div>
+      </section>
+      
+
+      <!-- Seção de participantes -->
+      <section class="integrantes">
+          <h2>Participantes do Projeto</h2>
+          <div class="caixas">
+              <div class="Imagem-habilidade" onMouseEnter="toggleText('integrante1')" onMouseLeave="toggleText(null)">
+                  <img src="integrante1.jpg" alt="Integrante 1" />
+                  <div class="texto-habilidade">Integrante 1</div>
+                  <div class="contribuicoes" id="integrante1">Contribuições de Integrante 1</div>
+              </div>
+              <div class="Imagem-habilidade" onMouseEnter="toggleText('integrante2')" onMouseLeave="toggleText(null)">
+                  <img src="integrante2.jpg" alt="Integrante 2" />
+                  <div class="texto-habilidade">Integrante 2</div>
+                  <div class="contribuicoes" id="integrante2">Contribuições de Integrante 2</div>
+              </div>
+              <div class="Imagem-habilidade" onMouseEnter="toggleText('integrante3')" onMouseLeave="toggleText(null)">
+                  <img src="integrante3.jpg" alt="Integrante 3" />
+                  <div class="texto-habilidade">Integrante 3</div>
+                  <div class="contribuicoes" id="integrante3">Contribuições de Integrante 3</div>
+              </div>
+              <div class="Imagem-habilidade" onMouseEnter="toggleText('integrante4')" onMouseLeave="toggleText(null)">
+                  <img src="integrante4.jpg" alt="Integrante 4" />
+                  <div class="texto-habilidade">Integrante 4</div>
+                  <div class="contribuicoes" id="integrante4">Contribuições de Integrante 4</div>
+              </div>
+              <div class="Imagem-habilidade" onMouseEnter="toggleText('integrante5')" onMouseLeave="toggleText(null)">
+                  <img src="integrante5.jpg" alt="Integrante 5" />
+                  <div class="texto-habilidade">Integrante 5</div>
+                  <div class="contribuicoes" id="integrante5">Contribuições de Integrante 5</div>
+              </div>
+          </div>
+          <div class="frase-domino">
+              Hover sobre as imagens para ver as contribuições!
+          </div>
+      </section>
+    </main>
+    <script src="scripts/home.js"></script>
+</body>
+</html>

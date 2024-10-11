@@ -1,0 +1,6 @@
+google-generativeai
+scikit-learn
+numpy
+prompt_toolkit
+flask
+mysql

@@ -1,0 +1,37 @@
+/* Estilos do Header */
+.header {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background-color: transparent; /* Fundo transparente */
+  padding: 20px 0;
+  display: flex;
+  justify-content: flex-end; /* Alinha os itens à direita */
+}
+
+/* Links de navegação */
+.nav-links {
+  display: flex;
+  justify-content: flex-end; /* Alinha os links à direita */
+  align-items: center; /* Alinha os itens verticalmente */
+  margin-right: 20px; /* Adiciona um espaço à direita, se necessário */
+}
+
+.nav-link {
+  color: #eaeaea; /* Cor do texto */
+  text-decoration: none;
+  margin: 0 15px; /* Espaçamento entre os links */
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #00ff66; /* Cor ao passar o mouse */
+}
+
+/* Ajustes na classe scrolled */
+.header.scrolled {
+  background-color: rgba(0, 0, 0, 0.7); /* Fundo ao rolar */
+}

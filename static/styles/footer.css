@@ -1,0 +1,20 @@
+/* Estilo simples e minimalista para o footer */
+.footer {
+    background-color: rgba(18, 18, 18, 0.9); /* Fundo ao rolar, mais escuro */
+    color: #cccccc; /* Texto em cinza claro para contrastar com o fundo */
+    padding: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 100;
+  }
+  
+  
+  .footer p {
+    margin: 0; /* Remove margens extras */
+    font-family: Arial, sans-serif; /* Fonte padrão e discreta */
+    font-size: 0.9rem;
+  }
+  

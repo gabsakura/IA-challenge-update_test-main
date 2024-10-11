@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Gráficos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-5">Dashboard de Gráficos</h2>
+        <div class="chart-container">
+            <div>
+                <h4>Setor de Vibração</h4>
+                <canvas id="vibrationChart"></canvas>
+            </div>
+            <div>
+                <h4>Média de Performance (Temperatura)</h4>
+                <canvas id="gaugeChart"></canvas>
+            </div>
+            <div>
+                <h4>Setor de Corrente</h4>
+                <canvas id="temperatureChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incluindo o JavaScript externo -->
+    <script src="{{ url_for('static', filename='scripts/dashboard.js') }}"></script>
+    <script>
+        // Dados enviados pelo Flask
+        const vibrationData = { vibration_data ,tojson};
+        const currentData = {current_data , tojson };
+        const temperatureData = { temperature_data , tojson };
+
+        // Chamando a função para desenhar os gráficos
+        loadCharts(vibrationData, currentData, temperatureData);
+    </script>
+</body>
+</html>
