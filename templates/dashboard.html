@@ -30,9 +30,9 @@
     <script src="{{ url_for('static', filename='scripts/dashboard.js') }}"></script>
     <script>
         // Dados enviados pelo Flask
-        const vibrationData = { vibration_data ,tojson};
-        const currentData = {current_data , tojson };
-        const temperatureData = { temperature_data , tojson };
+        const vibrationData = { vibracao,tojson};
+        const currentData = {tensao , tojson };
+        const temperatureData = { temperatura , tojson };
 
         // Chamando a função para desenhar os gráficos
         loadCharts(vibrationData, currentData, temperatureData);
