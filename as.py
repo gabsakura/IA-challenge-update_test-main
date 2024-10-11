@@ -1,21 +1,17 @@
 import sqlite3
 
-def criar_tabela():
-    conn = sqlite3.connect('instance/dados.db')
+def verificar_tabela():
+    conn = sqlite3.connect('instance/dados.db')  # Ajuste o caminho se necessário
     cursor = conn.cursor()
-    
-    # Criando a tabela "dados" se ela não existir
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS dados (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            corrente REAL,
-            vibracao REAL,
-            temperatura REAL
-        )
-    ''')
-    
-    conn.commit()
+
+    # Listando todas as tabelas no banco de dados
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tabelas = cursor.fetchall()
+
+    print("Tabelas existentes no banco de dados:")
+    for tabela in tabelas:
+        print(tabela[0])
+
     conn.close()
 
-# Chamar a função para criar a tabela
-criar_tabela()
+verificar_tabela()

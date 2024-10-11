@@ -27,7 +27,7 @@ def home():
     return render_template("home.html")
 
 def get_dados():
-    conn = sqlite3.connect('dados.db')
+    conn = sqlite3.connect('instance/dados.db')
     cursor = conn.cursor()
     cursor.execute("SELECT corrente, vibracao, temperatura FROM dados")
     rows = cursor.fetchall()
