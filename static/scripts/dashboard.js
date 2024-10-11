@@ -1,4 +1,4 @@
-function loadCharts(vibrationData, currentData, temperatureData) {
+function loadCharts(vibracao, tensao, temperatura) {
     // Gráfico de Linhas - Setor de Vibração
     const ctxVibration = document.getElementById('vibrationChart').getContext('2d');
     new Chart(ctxVibration, {
