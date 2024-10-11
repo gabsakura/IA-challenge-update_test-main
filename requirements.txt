@@ -4,3 +4,5 @@ numpy
 prompt_toolkit
 flask
 mysql
+flask_sqlalchemy
+flask_migrate
