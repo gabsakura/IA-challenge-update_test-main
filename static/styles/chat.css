@@ -1,0 +1,64 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #1f1f1f; 
+}
+
+.chat {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card {
+    flex: 1;
+    border-radius: 15px !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.msg_card_body {
+    overflow-y: auto;
+    height: calc(100% - 60px);
+}
+
+.msg_cotainer {
+    background-color: #3498db;
+    padding: 10px;
+    border-radius: 20px;
+    position: relative;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.msg_cotainer_send {
+    background-color: #27ae60;
+    padding: 10px;
+    border-radius: 20px;
+    position: relative;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.msg_time, .msg_time_send {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#loading {
+    display: none;
+    color: white;
+}
+
+.input-group {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0 0 15px 15px;
+}
+
+.input-group .form-control {
+    border: none;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}

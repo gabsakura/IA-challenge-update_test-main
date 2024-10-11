@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 import sqlite3
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'sua_chave_secreta'
@@ -27,55 +28,72 @@ def home():
     return render_template("home.html")
 
 def get_dados():
-    conn = sqlite3.connect('instance/dados.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT corrente, vibracao, temperatura FROM dados")
-    rows = cursor.fetchall()
-    conn.close()
-    
-    corrente = [row[0] for row in rows]
-    vibracao = [row[1] for row in rows]
-    temperatura = [row[2] for row in rows]
-    labels = [f'Item {i+1}' for i in range(len(rows))]
+    try:
+        conn = sqlite3.connect('instance/dados.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT corrente, vibracao, temperatura, timestamp FROM dados")
+        rows = cursor.fetchall()
+        conn.close()
 
-    return {
-        'corrente': corrente,
-        'vibracao': vibracao,
-        'temperatura': temperatura,
-        'labels': labels
-    }
+        corrente = [row[0] for row in rows]
+        vibracao = [row[1] for row in rows]
+        temperatura = [row[2] for row in rows]
+        timestamp = [datetime.strptime(row[3], '%Y-%m-%d %H:%M:%S').strftime('%d/%m') for row in rows]
+
+
+
+        # Mostrar um dos dados obtidos
+        print(f"Primeiro dado de corrente: {corrente[0]}")
+        
+        return {
+            'corrente': corrente,
+            'vibracao': vibracao,
+            'temperatura': temperatura,
+            'tempo': timestamp,
+        }
+    except sqlite3.Error as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
+        return None
+
 @app.route("/dashboard", methods=['GET', 'POST'])
 def dashboard():
     if request.method == 'POST':
         # Processar os dados enviados via POST, se houver.
-        # Por exemplo, você pode capturar dados de um formulário aqui.
         pass
 
     # Para requisições GET, carregue os dados do banco e passe para o template.
     data = get_dados()
     
+    if data is None:
+        return "Erro ao obter dados do banco de dados."
+
     # Separando os dados em objetos
     vibration_data = {
-        'labels': data['labels'],  # Labels dos eixos x
+        'tempo': data['tempo'],  # tempo dos eixos x
         'values': data['vibracao'],  # Dados de vibração
     }
     
-    current_data = {
-        'labels': data['labels'],  # Labels dos eixos x
+    corrente_data = {
+        'tempo': data['tempo'],  # tempo dos eixos x
         'values': data['corrente'],  # Dados de corrente
     }
     
     temperature_data = {
-        'value': sum(data['temperatura']) / len(data['temperatura'])  # Média de temperatura para o gráfico Gauge
+    'tempo': data['tempo'],  # timestamp de temperatura
+    'value': data['temperatura'],  # todos os valores de temperatura
     }
+
     
     # Renderizando a página do dashboard com os dados
-    return render_template("dashboard.html", vibration_data=vibration_data, current_data=current_data, temperature_data=temperature_data)
+    return render_template("dashboard.html", vibration_data=vibration_data, corrente_data=corrente_data, temperature_data=temperature_data,)
 
 @app.route('/api/dados')
 def api_dados():
     data = get_dados()
+    if data is None:
+        return jsonify({'error': 'Erro ao obter dados do banco de dados'}), 500
     return jsonify(data)
+
 
 # Registro de usuário
 @app.route('/register', methods=['GET', 'POST'])
@@ -115,21 +133,9 @@ def login():
 def about():
     return render_template("about.html")
 
-@app.route("/technologies")
-def technologies():
-    return render_template("technologies.html")
-
-@app.route("/chat")
+@app.route("/chat") 
 def index():
     return render_template("chat.html")
-
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
-
-@app.route('/services')
-def services():
-    return render_template('services.html')
 
 @app.route("/get", methods=["POST"])
 def chat():

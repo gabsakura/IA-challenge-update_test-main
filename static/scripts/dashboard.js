@@ -4,7 +4,7 @@ function loadCharts(vibracao, tensao, temperatura) {
     new Chart(ctxVibration, {
         type: 'line',
         data: {
-            labels: vibrationData.labels,
+            labels: vibrationData.tempo,
             datasets: [{
                 label: 'Vibração',
                 data: vibrationData.values,
@@ -28,9 +28,9 @@ function loadCharts(vibracao, tensao, temperatura) {
     new Chart(ctxGauge, {
         type: 'doughnut',
         data: {
-            labels: ['Temperatura'],
+            labels: ['corrente'],
             datasets: [{
-                data: [temperatureData.value, 100 - temperatureData.value], // Valor atual e o restante
+                data: [correnteData.value, 100 - correnteData.value], // Valor atual e o restante
                 backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(0, 0, 0, 0)'],
                 borderWidth: 0
             }]
