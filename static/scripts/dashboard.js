@@ -20,15 +20,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log("Dados recebidos:", data);
                 const vibrationData = {
                     labels: data.tempo,
-                    values: data.vibracao
+                    datasets: [{
+                        label: 'Vibração Base',
+                        data: data.vibracao,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: true
+                    }]
                 };
                 const correnteData = {
                     labels: data.tempo,
-                    values: data.corrente
+                    datasets: [{
+                        label: 'Corrente',
+                        data: data.corrente,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1,
+                        fill: true
+                    }]
                 };
                 const temperatureData = {
                     labels: data.tempo,
-                    values: data.temperatura
+                    datasets: [{
+                        label: 'Temperatura',
+                        data: data.temperatura,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        fill: true
+                    }]
                 };
                 loadCharts(vibrationData, correnteData, temperatureData);
             })
@@ -49,17 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctxVibration = document.getElementById('vibrationChart').getContext('2d');
         vibrationChartInstance = new Chart(ctxVibration, {
             type: 'line',
-            data: {
-                labels: vibrationData.labels,
-                datasets: [{
-                    label: 'Vibração Base',
-                    data: vibrationData.values,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                    fill: true
-                }]
-            },
+            data: vibrationData,
             options: {
                 scales: {
                     x: {
@@ -80,17 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctxCurrent = document.getElementById('currentChart').getContext('2d');
         currentChartInstance = new Chart(ctxCurrent, {
             type: 'line',
-            data: {
-                labels: correnteData.labels,
-                datasets: [{
-                    label: 'Corrente',
-                    data: correnteData.values,
-                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                    borderColor: 'rgba(153, 102, 255, 1)',
-                    borderWidth: 1,
-                    fill: true
-                }]
-            },
+            data: correnteData,
             options: {
                 scales: {
                     x: {
@@ -111,17 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctxTemperature = document.getElementById('gaugeChart').getContext('2d');
         temperatureChartInstance = new Chart(ctxTemperature, {
             type: 'line',
-            data: {
-                labels: temperatureData.labels,
-                datasets: [{
-                    label: 'Temperatura',
-                    data: temperatureData.values,
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1,
-                    fill: true
-                }]
-            },
+            data: temperatureData,
             options: {
                 scales: {
                     x: {

@@ -19,3 +19,6 @@ canvas {
     padding: 20px;
     border-radius: 10px;
 }
+.chart-container canvas {
+    border: 1px solid black; /* Isso irá ajudar a ver se os gráficos estão sendo desenhados */
+}
