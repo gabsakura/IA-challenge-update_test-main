@@ -4,13 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Gráficos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/dashboard.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Usando Chart.js diretamente do diretório static -->
+    <script src="{{ url_for('static', filename='scripts/chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/chartjs-adapter-date-fns.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/dashboard.css') }}" />
 </head>
 <body>
     {% include 'components/posHeader.html' %}
     <div class="container">
         <h2 class="text-center mb-5">Dashboard de Gráficos</h2>
+        
+        <!-- Dropdown para seleção do intervalo de tempo -->
+        <div class="mb-3">
+            <label for="timeRange">Escolha o intervalo de tempo:</label>
+            <select id="timeRange">
+                <option value="day">Dia</option>
+                <option value="week">Semana</option>
+                <option value="month">Mês</option>
+                <option value="year">Ano</option>
+            </select>
+            <button id="applyFilter">Aplicar Filtro</button>
+        </div>
+
         <div class="chart-container">
             <div>
                 <h4>Setor de Vibração Base</h4>
@@ -27,143 +42,154 @@
         </div>
     </div>
 
-    <!-- Incluindo o JavaScript externo -->
-    <script src="{{ url_for('static', filename='scripts/dashboard.js') }}"></script>
     <script>
-        // Dados enviados pelo Flask
-        document.addEventListener('DOMContentLoaded', (event) => {
-    fetch('/api/dados')
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error("Erro no servidor:", data.error);
-                return;
+        let vibrationChartInstance = null;
+        let currentChartInstance = null;
+        let temperatureChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const applyFilterBtn = document.getElementById('applyFilter');
+            applyFilterBtn.addEventListener('click', () => {
+                const timeRange = document.getElementById('timeRange').value;
+                fetchData(timeRange);
+            });
+
+            function fetchData(timeRange) {
+                fetch(`/api/dados?time_range=${timeRange}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error("Erro no servidor:", data.error);
+                            return;
+                        }
+
+                        console.log("Dados recebidos:", data);
+
+                        const vibrationData = {
+                            labels: data.tempo,
+                            values: data.vibracao
+                        };
+                        const correnteData = {
+                            labels: data.tempo,
+                            values: data.corrente
+                        };
+                        const temperatureData = {
+                            labels: data.tempo,
+                            values: data.temperatura
+                        };
+
+                        loadCharts(vibrationData, correnteData, temperatureData);
+                    })
+                    .catch(error => console.error('Erro ao carregar dados:', error));
             }
 
-            console.log("Dados recebidos:", data);
+            function destroyChart(chartInstance) {
+                if (chartInstance) {
+                    chartInstance.destroy();  
+                }
+            }
 
-            const vibrationData = {
-                labels: data.tempo,
-                values: data.vibracao
-            };
-            const correnteData = {
-                labels: data.tempo,
-                values: data.corrente
-            };
-            const temperatureData = {
-                value: data.temperatura.reduce((a, b) => a + b, 0) / data.temperatura.length
-            };
+            function loadCharts(vibrationData, correnteData, temperatureData) {
+                destroyChart(vibrationChartInstance);
+                destroyChart(currentChartInstance);
+                destroyChart(temperatureChartInstance);
 
-            console.log("Dados Recebidos:", data);
-            console.log("Vibration Data:", vibrationData);
-            console.log("Temperature Data:", temperatureData);
-            console.log("Current Data:", correnteData);
-
-
-            loadCharts(vibrationData, correnteData, temperatureData);
-        })
-        .catch(error => console.error('Erro ao carregar dados:', error));
-});
-
-function loadCharts(vibrationData, correnteData, temperatureData) {
-    // Gráfico de Linhas - Setor de Vibração
-const ctxVibration = document.getElementById('vibrationChart').getContext('2d');
-    new Chart(ctxVibration, {
-        type: 'line',
-        data: {
-            labels: vibrationData.labels,
-            datasets: [{
-                label: 'Vibração',
-                data: vibrationData.values,
-                data: vibrationData.tempo,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1,
-                fill: true
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    type: 'time',  // Define o eixo X como 'time'
-                    time: {
-                        unit: 'day',  // Exibe as datas por dia
-                        tooltipFormat: 'DD/MM/YYYY HH:mm',  // Formato de exibição ao passar o mouse
-                        displayFormats: {
-                            day: 'DD/MM'  // Formato de exibição no eixo
+                const ctxVibration = document.getElementById('vibrationChart').getContext('2d');
+                vibrationChartInstance = new Chart(ctxVibration, {
+                    type: 'line',
+                    data: {
+                        labels: vibrationData.labels,
+                        datasets: [{
+                            label: 'Vibração Base',
+                            data: vibrationData.values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    tooltipFormat: 'dd/MM/yyyy HH:mm',
+                                    displayFormats: { day: 'dd/MM' }
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
                         }
                     }
-                },
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+                });
 
-
-    // Gráfico de Meio Círculo (Gauge) - Setor de Temperatura
-    const ctxTemperature = document.getElementById('gaugeChart').getContext('2d');
-    new Chart(ctxTemperature, {
-        type: 'line',  // Gráfico de linha para temperatura
-        data: {
-            labels: temperatureData.labels,  // Labels são os timestamps
-            datasets: [{
-                label: 'Temperatura',
-                data: temperatureData.values,  // Dados de temperatura completos
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1,
-                fill: true
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        unit: 'day',
-                        tooltipFormat: 'DD/MM/YYYY HH:mm',
-                        displayFormats: {
-                            day: 'DD/MM'
+                const ctxCurrent = document.getElementById('currentChart').getContext('2d');
+                currentChartInstance = new Chart(ctxCurrent, {
+                    type: 'line',
+                    data: {
+                        labels: correnteData.labels,
+                        datasets: [{
+                            label: 'Corrente',
+                            data: correnteData.values,
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    tooltipFormat: 'dd/MM/yyyy HH:mm',
+                                    displayFormats: { day: 'dd/MM' }
+                                }
+                            },
+                            y: {
+                                beginAtZero: false
+                            }
                         }
                     }
-                },
-                y: {
-                    beginAtZero: true
-                }
+                });
+
+                const ctxTemperature = document.getElementById('gaugeChart').getContext('2d');
+                temperatureChartInstance = new Chart(ctxTemperature, {
+                    type: 'line',
+                    data: {
+                        labels: temperatureData.labels,
+                        datasets: [{
+                            label: 'Temperatura',
+                            data: temperatureData.values,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    tooltipFormat: 'dd/MM/yyyy HH:mm',
+                                    displayFormats: { day: 'dd/MM' }
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
             }
-        }
-    });
-        
 
-
-    // Gráfico de Linhas - Setor de Corrente
-    const ctxCurrent = document.getElementById('currentChart').getContext('2d');
-    new Chart(ctxCurrent, {
-        type: 'line',
-        data: {
-            labels: correnteData.labels,
-            datasets: [{
-                label: 'Corrente',
-                data: correnteData.values,
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                borderColor: 'rgba(153, 102, 255, 1)',
-                borderWidth: 1,
-                fill: true
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: false
-                }
-            }
-        }
-    });
-}
-
-    
+            fetchData('day');
+        });
     </script>
 </body>
 </html>

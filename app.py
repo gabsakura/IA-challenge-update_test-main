@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'sua_chave_secreta'
@@ -27,71 +27,95 @@ class User(db.Model):
 def home():
     return render_template("home.html")
 
+# Função para obter todos os dados (sem filtro)
 def get_dados():
     try:
         conn = sqlite3.connect('instance/dados.db')
         cursor = conn.cursor()
-        cursor.execute("SELECT corrente, vibracao, temperatura, timestamp FROM dados")
+        cursor.execute("SELECT temperatura, corrente, vibracao_base, vibracao_braco, data_registro FROM dados")
         rows = cursor.fetchall()
         conn.close()
 
-        corrente = [row[0] for row in rows]
-        vibracao = [row[1] for row in rows]
-        temperatura = [row[2] for row in rows]
-        timestamp = [datetime.strptime(row[3], '%Y-%m-%d %H:%M:%S').strftime('%d/%m') for row in rows]
+        if not rows:
+            print("Nenhum dado encontrado no banco de dados.")
+            return None
 
+        temperatura = [row[0] for row in rows]
+        corrente = [row[1] for row in rows]
+        vibracao = [row[2] for row in rows]
+        vibracao_braco = [row[3] for row in rows]
+        timestamp = [datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S').strftime('%d/%m') for row in rows]
 
-
-        # Mostrar um dos dados obtidos
-        print(f"Primeiro dado de corrente: {corrente[0]}")
-        
         return {
             'corrente': corrente,
             'vibracao': vibracao,
             'temperatura': temperatura,
+            'vibracao_braco': vibracao_braco,
             'tempo': timestamp,
         }
     except sqlite3.Error as e:
         print(f"Erro ao conectar ao banco de dados: {e}")
         return None
 
-@app.route("/dashboard", methods=['GET', 'POST'])
-def dashboard():
-    if request.method == 'POST':
-        # Processar os dados enviados via POST, se houver.
-        pass
+# Função que filtra os dados com base no intervalo de tempo e limita a 100 valores
+def get_dados_filtrados(time_range):
+    try:
+        conn = sqlite3.connect('instance/dados.db')
+        cursor = conn.cursor()
 
-    # Para requisições GET, carregue os dados do banco e passe para o template.
-    data = get_dados()
-    
-    if data is None:
-        return "Erro ao obter dados do banco de dados."
+        now = datetime.now()
 
-    # Separando os dados em objetos
-    vibration_data = {
-        'tempo': data['tempo'],  # tempo dos eixos x
-        'values': data['vibracao'],  # Dados de vibração
-    }
-    
-    corrente_data = {
-        'tempo': data['tempo'],  # tempo dos eixos x
-        'values': data['corrente'],  # Dados de corrente
-    }
-    
-    temperature_data = {
-    'tempo': data['tempo'],  # timestamp de temperatura
-    'value': data['temperatura'],  # todos os valores de temperatura
-    }
+        # Filtra com base no intervalo de tempo selecionado
+        if time_range == 'day':
+            start_time = now - timedelta(days=1)
+        elif time_range == 'week':
+            start_time = now - timedelta(weeks=1)
+        elif time_range == 'month':
+            start_time = now - timedelta(days=30)
+        elif time_range == 'year':
+            start_time = now - timedelta(days=365)
+        else:
+            start_time = now  # Default para dia atual
 
-    
-    # Renderizando a página do dashboard com os dados
-    return render_template("dashboard.html", vibration_data=vibration_data, corrente_data=corrente_data, temperature_data=temperature_data,)
+        # Consulta o banco de dados com base no timestamp filtrado
+        cursor.execute("""
+            SELECT temperatura, corrente, vibracao_base, vibracao_braco, data_registro
+            FROM dados
+            WHERE data_registro >= ?
+            ORDER BY data_registro DESC
+            LIMIT 100
+        """, (start_time.strftime('%Y-%m-%d %H:%M:%S'),))
+        
+        rows = cursor.fetchall()
+        conn.close()
+
+        if not rows:
+            print(f"Nenhum dado encontrado para o intervalo: {time_range}")
+            return None
+
+        temperatura = [row[0] for row in rows]
+        corrente = [row[1] for row in rows]
+        vibracao = [row[2] for row in rows]
+        vibracao_braco = [row[3] for row in rows]
+        timestamp = [datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M') for row in rows]
+
+        return {
+            'temperatura': temperatura,
+            'corrente': corrente,
+            'vibracao': vibracao,
+            'vibracao_braco': vibracao_braco,
+            'tempo': timestamp,
+        }
+    except sqlite3.Error as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
+        return None
 
 @app.route('/api/dados')
 def api_dados():
-    data = get_dados()
+    time_range = request.args.get('time_range', 'day')
+    data = get_dados_filtrados(time_range)
     if data is None:
-        return jsonify({'error': 'Erro ao obter dados do banco de dados'}), 500
+        return jsonify({'error': f'Erro ao obter dados para o intervalo: {time_range}'}), 500
     return jsonify(data)
 
 
@@ -132,7 +156,9 @@ def login():
 @app.route("/about")
 def about():
     return render_template("about.html")
-
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 @app.route("/chat") 
 def index():
     return render_template("chat.html")
@@ -145,6 +171,3 @@ def chat():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
