@@ -118,6 +118,9 @@ def api_dados():
         return jsonify({'error': f'Erro ao obter dados para o intervalo: {time_range}'}), 500
     return jsonify(data)
 
+@app.route("/dashboard", methods=['GET', 'POST'])
+def dashboard():
+    return render_template("dashboard.html")
 
 # Registro de usuário
 @app.route('/register', methods=['GET', 'POST'])
@@ -156,9 +159,8 @@ def login():
 @app.route("/about")
 def about():
     return render_template("about.html")
-@app.route("/dashboard")
-def dashboard():
-    return render_template("dashboard.html")
+
+
 @app.route("/chat") 
 def index():
     return render_template("chat.html")
