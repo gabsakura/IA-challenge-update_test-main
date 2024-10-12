@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Gráficos</title>
-    <!-- Inclua os scripts na ordem correta -->
+    <!-- Chart.js e Zoom Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/dashboard.css') }}" />
 </head>
 <body>
     {% include 'components/posHeader.html' %}
     <div class="container">
-        <h2 class="text-center mb-5">Dashboard de Gráficos</h2>
+        <h2 class="text-center mb-5">Dashboard de Gráficos com Zoom</h2>
+        
         <!-- Dropdown para seleção do intervalo de tempo -->
-        <div class="mb-3">
+        <div class="filter-container">
             <label for="timeRange">Escolha o intervalo de tempo:</label>
             <select id="timeRange">
                 <option value="day">Dia</option>
@@ -24,18 +26,23 @@
             </select>
             <button id="applyFilter">Aplicar Filtro</button>
         </div>
-        <div class="chart-container">
-            <div>
-                <h4>Setor de Vibração Base</h4>
-                <canvas id="vibrationChart"></canvas>
+
+        <div class="chart-grid">
+            <div class="chart-item">
+                <h4>Vibração Braço</h4>
+                <canvas id="vibrationBracoChart"></canvas>
             </div>
-            <div>
-                <h4>Setor Temperatura</h4>
-                <canvas id="gaugeChart"></canvas>
+            <div class="chart-item">
+                <h4>Vibração Base</h4>
+                <canvas id="vibrationBaseChart"></canvas>
             </div>
-            <div>
-                <h4>Setor de Corrente</h4>
+            <div class="chart-item">
+                <h4>Corrente</h4>
                 <canvas id="currentChart"></canvas>
+            </div>
+            <div class="chart-item">
+                <h4>Temperatura</h4>
+                <canvas id="temperatureChart"></canvas>
             </div>
         </div>
     </div>

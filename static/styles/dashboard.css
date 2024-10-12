@@ -1,24 +1,54 @@
+/* dashboard.css */
+
 body {
     background-color: #1f1f1f;
     color: #e0e0e0;
+    font-family: 'Arial', sans-serif;
 }
 
 .container {
     margin-top: 50px;
+    padding: 20px;
 }
 
-.chart-container {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    flex-wrap: wrap;
+.filter-container {
+    margin-bottom: 20px;
+    text-align: center;
 }
 
-canvas {
+.filter-container select, 
+.filter-container button {
+    padding: 10px;
+    margin-left: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #333;
+    color: white;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);  /* 2 gráficos por linha */
+    gap: 20px;
+    justify-items: center;
+}
+
+.chart-item {
     background-color: #2c2c2c;
     padding: 20px;
     border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
 }
-.chart-container canvas {
-    border: 1px solid black; /* Isso irá ajudar a ver se os gráficos estão sendo desenhados */
+
+.chart-item h4 {
+    text-align: center;
+    color: #fff;
+}
+
+canvas {
+    width: 100% !important;
+    height: 400px !important;
+    background-color: #333;
+    border-radius: 8px;
 }

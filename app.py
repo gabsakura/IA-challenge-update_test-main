@@ -42,13 +42,13 @@ def get_dados():
 
         temperatura = [row[0] for row in rows]
         corrente = [row[1] for row in rows]
-        vibracao = [row[2] for row in rows]
+        vibracao_base = [row[2] for row in rows]
         vibracao_braco = [row[3] for row in rows]
         timestamp = [datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S').strftime('%d/%m') for row in rows]
 
         return {
             'corrente': corrente,
-            'vibracao': vibracao,
+            'vibracao_base': vibracao_base,
             'temperatura': temperatura,
             'vibracao_braco': vibracao_braco,
             'tempo': timestamp,
@@ -83,7 +83,7 @@ def get_dados_filtrados(time_range):
             FROM dados
             WHERE data_registro >= ?
             ORDER BY data_registro DESC
-            LIMIT 100
+            LIMIT 10
         """, (start_time.strftime('%Y-%m-%d %H:%M:%S'),))
         
         rows = cursor.fetchall()
@@ -95,14 +95,14 @@ def get_dados_filtrados(time_range):
 
         temperatura = [row[0] for row in rows]
         corrente = [row[1] for row in rows]
-        vibracao = [row[2] for row in rows]
+        vibracao_base = [row[2] for row in rows]
         vibracao_braco = [row[3] for row in rows]
         timestamp = [datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M') for row in rows]
 
         return {
             'temperatura': temperatura,
             'corrente': corrente,
-            'vibracao': vibracao,
+            'vibracao_base': vibracao_base,
             'vibracao_braco': vibracao_braco,
             'tempo': timestamp,
         }
@@ -114,6 +114,7 @@ def get_dados_filtrados(time_range):
 def api_dados():
     time_range = request.args.get('time_range', 'day')
     data = get_dados_filtrados(time_range)
+    #data= data[:20]
     if data is None:
         return jsonify({'error': f'Erro ao obter dados para o intervalo: {time_range}'}), 500
     return jsonify(data)
