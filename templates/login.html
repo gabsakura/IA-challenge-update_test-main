@@ -29,26 +29,22 @@
             </form>
             <p class="text-center mt-3">Não tem uma conta? <a href="/register" class="text-primary">Registre-se aqui</a></p>
         </div>
-        <div aria-live="polite" aria-atomic="true" style="position: relative;">
-            <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                    <div class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                {{ message }}
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
+    </div>
+    
+    <!-- Toast de sucesso -->
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="success-toast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        Conectado com sucesso!
                     </div>
-                    {% endfor %}
-                {% endif %}
-                {% endwith %}
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
             </div>
         </div>
     </div>
-    {% include 'components/toast.html' %}
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='scripts/toast.js') }}"></script>
     <script>
@@ -64,13 +60,15 @@
                     $(this).text('🔒'); // Ícone para esconder a senha
                 }
             });
-        });
-        document.addEventListener("DOMContentLoaded", function() {
-            var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-            var toastList = toastElList.map(function (toastEl) {
-                return new bootstrap.Toast(toastEl, { delay: 5000 });
-            });
-            toastList.forEach(toast => toast.show());
+
+            // Simulação de login bem-sucedido para exibir o toast
+            const isLoginSuccess = true; // Substituir com a lógica real do backend
+
+            if (isLoginSuccess) {
+                const toastEl = document.getElementById('success-toast');
+                const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                toast.show();
+            }
         });
     </script>
     {% include 'components/footer.html' %}

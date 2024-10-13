@@ -1,46 +1,19 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monday - Chatbot IA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" crossorigin="anonymous" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/chat.css') }}" />
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- Para usar ícones FontAwesome -->
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/header.css') }}">
+  <title>Header</title>
 </head>
 <body>
-    <div class="container-fluid h-100">
-        <div class="row justify-content-center h-100">
-            <div class="col-md-8 col-xl-6 chat">
-                <div class="card">
-                    <div class="card-header msg_head">
-                        <div class="d-flex align-items-center">
-                            <div class="img_cont">
-                                <img src="img/projeto.avif" class="rounded-circle user_img" />
-                            </div>
-                            <div class="user_info">
-                                <span>Monday</span>
-                                <p>Pronta para ajudar de segunda a segunda!</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="messageFormeight" class="card-body msg_card_body"></div>
-                    <div class="card-footer">
-                        <form id="messageArea" class="input-group">
-                            <input type="text" id="text" name="msg" placeholder="Digite sua mensagem..." autocomplete="off" class="form-control type_msg" required />
-                            <div class="input-group-append">
-                                <button type="submit" id="send" class="btn send_btn">
-                                    <i class="fas fa-arrow-up"></i> <!-- Ícone de seta -->
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script src="{{ url_for('static', filename='scripts/chat.js') }}"></script>
-    </div>
+  <header class="header">
+    <nav class="nav-links">
+      <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+      <a href="{{ url_for('login') }}" class="nav-link">Login</a> 
+    </nav>
+  </header>
+  <script src="scripts/header.js"></script>
 </body>
 </html>
