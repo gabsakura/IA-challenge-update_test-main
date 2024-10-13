@@ -11,10 +11,17 @@ async function fetchData(filters) {
     return data;
 }
 
+// Variáveis globais para os gráficos
+let vibrationBracoChart, vibrationBaseChart, currentChart, temperatureChart;
+
 // Função para inicializar os gráficos vazios
 function initCharts() {
     const ctxVibrationBraco = document.getElementById('vibrationBracoChart').getContext('2d');
-    const vibrationBracoChart = new Chart(ctxVibrationBraco, {
+    const ctxVibrationBase = document.getElementById('vibrationBaseChart').getContext('2d');
+    const ctxCurrent = document.getElementById('currentChart').getContext('2d');
+    const ctxTemperature = document.getElementById('temperatureChart').getContext('2d');
+
+    vibrationBracoChart = new Chart(ctxVibrationBraco, {
         type: 'line',
         data: {
             labels: [],
@@ -28,18 +35,13 @@ function initCharts() {
         },
         options: {
             scales: {
-                x: {
-                    beginAtZero: true
-                },
-                y: {
-                    beginAtZero: true
-                }
+                x: { beginAtZero: true },
+                y: { beginAtZero: true }
             }
         }
     });
 
-    const ctxVibrationBase = document.getElementById('vibrationBaseChart').getContext('2d');
-    const vibrationBaseChart = new Chart(ctxVibrationBase, {
+    vibrationBaseChart = new Chart(ctxVibrationBase, {
         type: 'line',
         data: {
             labels: [],
@@ -53,18 +55,13 @@ function initCharts() {
         },
         options: {
             scales: {
-                x: {
-                    beginAtZero: true
-                },
-                y: {
-                    beginAtZero: true
-                }
+                x: { beginAtZero: true },
+                y: { beginAtZero: true }
             }
         }
     });
 
-    const ctxCurrent = document.getElementById('currentChart').getContext('2d');
-    const currentChart = new Chart(ctxCurrent, {
+    currentChart = new Chart(ctxCurrent, {
         type: 'line',
         data: {
             labels: [],
@@ -78,18 +75,13 @@ function initCharts() {
         },
         options: {
             scales: {
-                x: {
-                    beginAtZero: true
-                },
-                y: {
-                    beginAtZero: true
-                }
+                x: { beginAtZero: true },
+                y: { beginAtZero: true }
             }
         }
     });
 
-    const ctxTemperature = document.getElementById('temperatureChart').getContext('2d');
-    const temperatureChart = new Chart(ctxTemperature, {
+    temperatureChart = new Chart(ctxTemperature, {
         type: 'line',
         data: {
             labels: [],
@@ -103,87 +95,218 @@ function initCharts() {
         },
         options: {
             scales: {
-                x: {
-                    beginAtZero: true
-                },
-                y: {
-                    beginAtZero: true
-                }
+                x: { beginAtZero: true },
+                y: { beginAtZero: true }
             }
         }
     });
-
-    return { vibrationBracoChart, vibrationBaseChart, currentChart, temperatureChart };
 }
 
-// Função para aplicar os filtros
-async function applyFilters() {
-    const selectedTimeRange = document.getElementById('timeRange').value;
-    const day = document.getElementById('day').value;
-    const month = document.getElementById('month').value;
-    const week = document.getElementById('week').value;
-    const year = document.getElementById('year').value;
-    const monthWeek = document.getElementById('monthWeek').value;
-
-    const filters = {
-        timeRange: selectedTimeRange,
-        day: selectedTimeRange === 'day' ? day : null,
-        month: selectedTimeRange === 'month' ? month : null,
-        week: selectedTimeRange === 'week' ? week : null,
-        year: selectedTimeRange === 'year' ? year : null,
-        monthWeek: selectedTimeRange === 'week' ? monthWeek : null
-    };
-
-    const data = await fetchData(filters);
-    updateCharts(data, selectedTimeRange);  // Passa o intervalo de tempo
+// Função genérica para atualizar os gráficos
+function updateChart(chart, labels, data) {
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = data || [];
+    chart.update();
 }
 
-// Função para atualizar os gráficos com base no intervalo de tempo selecionado
-function updateCharts(data, timeRange) {
+// Função para formatar timestamps
+function formatTimestamps(timestamps, type) {
+    if (type === 'daily') {
+        return timestamps.map(ts => new Date(`1970-01-01T${ts}:00Z`).toLocaleTimeString());
+    } else if (type === 'weekly' || type === 'monthly') {
+        return timestamps.map(ts => new Date(ts).toLocaleDateString('pt-BR'));
+    }
+    return timestamps;
+}
+
+// Funções específicas para atualizar gráficos
+function updateChartsDaily(data) {
     if (data && data.timestamp) {
-        let labelFormat;
-        switch (timeRange) {
-            case 'day':
-                labelFormat = ts => new Date(ts).toLocaleTimeString();  // Exibe horas
-                break;
-            case 'week':
-                labelFormat = ts => new Date(ts).toLocaleDateString();  // Exibe dias
-                break;
-            case 'month':
-                labelFormat = ts => `Semana ${getWeekOfMonth(new Date(ts))}`;  // Exibe semanas do mês
-                break;
-            case 'year':
-                labelFormat = ts => new Date(ts).toLocaleString('default', { month: 'short' });  // Exibe meses
-                break;
-            default:
-                labelFormat = ts => new Date(ts).toLocaleString();  // Exibe data completa como fallback
-        }
-
-        vibrationBracoChart.data.labels = data.timestamp.map(labelFormat);
-        vibrationBracoChart.data.datasets[0].data = data.vibracao_braco || [];
-        vibrationBracoChart.update();
-
-        vibrationBaseChart.data.labels = data.timestamp.map(labelFormat);
-        vibrationBaseChart.data.datasets[0].data = data.vibracao_base || [];
-        vibrationBaseChart.update();
-
-        currentChart.data.labels = data.timestamp.map(labelFormat);
-        currentChart.data.datasets[0].data = data.corrente || [];
-        currentChart.update();
-
-        temperatureChart.data.labels = data.timestamp.map(labelFormat);
-        temperatureChart.data.datasets[0].data = data.temperatura || [];
-        temperatureChart.update();
+        const formattedTimestamps = formatTimestamps(data.timestamp, 'daily');
+        updateChart(vibrationBracoChart, formattedTimestamps, data.vibracao_braco);
+        updateChart(vibrationBaseChart, formattedTimestamps, data.vibracao_base);
+        updateChart(currentChart, formattedTimestamps, data.corrente);
+        updateChart(temperatureChart, formattedTimestamps, data.temperatura);
     } else {
         console.error("Os dados fornecidos não são válidos:", data);
     }
 }
 
-// Função auxiliar para obter a semana do mês
-function getWeekOfMonth(date) {
-    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-    return Math.ceil((date.getDate() + firstDay) / 7);
+function updateChartsWeekly(data) {
+    if (data && data.timestamp) {
+        const formattedTimestamps = formatTimestamps(data.timestamp, 'weekly');
+        updateChart(vibrationBracoChart, formattedTimestamps, data.vibracao_braco);
+        updateChart(vibrationBaseChart, formattedTimestamps, data.vibracao_base);
+        updateChart(currentChart, formattedTimestamps, data.corrente);
+        updateChart(temperatureChart, formattedTimestamps, data.temperatura);
+    } else {
+        console.error("Os dados fornecidos não são válidos:", data);
+    }
 }
 
-const { vibrationBracoChart, vibrationBaseChart, currentChart, temperatureChart } = initCharts();
+function updateChartsMonthly(data) {
+    if (data && data.timestamp) {
+        const semanas = [];
+        const totalDias = data.timestamp.length;
+        const diasPorSemana = Math.ceil(totalDias / 4);  // Dividindo o mês em 4 semanas
+
+        for (let i = 0; i < 4; i++) {
+            const inicio = i * diasPorSemana;
+            const fim = inicio + diasPorSemana;
+
+            // Agrupar os dados semanais
+            const semanaVibracaoBraco = data.vibracao_braco.slice(inicio, fim);
+            const semanaVibracaoBase = data.vibracao_base.slice(inicio, fim);
+            const semanaCorrente = data.corrente.slice(inicio, fim);
+            const semanaTemperatura = data.temperatura.slice(inicio, fim);
+            
+            // Verificar se há dados suficientes para a semana
+            if (semanaVibracaoBraco.length > 0) {
+                // Calcula as médias semanais
+                const mediaVibracaoBraco = semanaVibracaoBraco.reduce((a, b) => a + b, 0) / semanaVibracaoBraco.length;
+                const mediaVibracaoBase = semanaVibracaoBase.reduce((a, b) => a + b, 0) / semanaVibracaoBase.length;
+                const mediaCorrente = semanaCorrente.reduce((a, b) => a + b, 0) / semanaCorrente.length;
+                const mediaTemperatura = semanaTemperatura.reduce((a, b) => a + b, 0) / semanaTemperatura.length;
+
+                semanas.push({
+                    timestamp: `Semana ${i + 1}`,  // Exibe "Semana 1", "Semana 2", etc.
+                    vibracao_braco: mediaVibracaoBraco,
+                    vibracao_base: mediaVibracaoBase,
+                    corrente: mediaCorrente,
+                    temperatura: mediaTemperatura
+                });
+            } else {
+                console.warn(`Dados insuficientes para a semana ${i + 1}`);
+            }
+        }
+
+        // Atualiza os gráficos com os dados das semanas
+        const formattedTimestamps = semanas.map(semana => semana.timestamp);
+        const vibracaoBracoData = semanas.map(semana => semana.vibracao_braco);
+        const vibracaoBaseData = semanas.map(semana => semana.vibracao_base);
+        const correnteData = semanas.map(semana => semana.corrente);
+        const temperaturaData = semanas.map(semana => semana.temperatura);
+
+        updateChart(vibrationBracoChart, formattedTimestamps, vibracaoBracoData);
+        updateChart(vibrationBaseChart, formattedTimestamps, vibracaoBaseData);
+        updateChart(currentChart, formattedTimestamps, correnteData);
+        updateChart(temperatureChart, formattedTimestamps, temperaturaData);
+    } else {
+        console.error("Os dados fornecidos não são válidos:", data);
+    }
+}
+
+
+
+
+// Adicionar o evento de clique ao botão "Aplicar Filtro"
 document.getElementById('applyFilter').addEventListener('click', applyFilters);
+async function applyFilters() {
+    const selectedTimeRange = document.getElementById('timeRange').value;
+    const filters = {
+        timeRange: selectedTimeRange,
+        day: document.getElementById('day').value,
+        month: document.getElementById('month').value,
+        week: document.getElementById('week').value,
+        year: document.getElementById('year').value,
+        monthWeek: document.getElementById('monthWeek').value
+    };
+
+    const data = await fetchData(filters);
+    if (selectedTimeRange === 'day') {
+        updateChartsDaily(data);
+    } else if (selectedTimeRange === 'week') {
+        updateChartsWeekly(data);
+    } else if (selectedTimeRange === 'month') {
+        updateChartsMonthly(data);
+    }
+}
+
+
+
+//FAZER PDF ESSA PARTE::::::::
+
+// Função assíncrona para gerar um relatório em PDF com os dados de sensores
+async function generatePDFReport(filters, data) {
+    // Carregar a biblioteca jsPDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF(); // Instância do jsPDF
+
+    // Adicionar título do relatório
+    doc.setFontSize(16);
+    doc.text(`Relatório de Dados de Sensores (${filters.timeRange})`, 10, 20);
+
+    // Informações sobre o filtro usado
+    doc.setFontSize(12);
+    doc.text(`Período: ${filters.timeRange}`, 10, 30);
+    if (filters.day) doc.text(`Dia: ${filters.day}`, 10, 40);
+    if (filters.month) doc.text(`Mês: ${filters.month}`, 10, 50);
+    if (filters.year) doc.text(`Ano: ${filters.year}`, 10, 60);
+
+    // Criar tabela de dados
+    let startY = 70;  // Posição inicial da tabela
+
+    // Cabeçalho da tabela
+    doc.setFontSize(10);
+    const headers = ["Data", "Vibração (Braço)", "Vibração (Base)", "Corrente", "Temperatura"];
+    headers.forEach((header, index) => {
+        doc.text(header, 10 + index * 40, startY); // Distribui os cabeçalhos uniformemente
+    });
+    startY += 10; // Incrementar posição para a primeira linha de dados
+
+    // Adicionar linhas de dados
+    data.timestamp.forEach((timestamp, index) => {
+        doc.text(new Date(timestamp).toLocaleDateString('pt-BR'), 10, startY);
+        doc.text(data.vibracao_braco[index].toFixed(2), 50, startY);
+        doc.text(data.vibracao_base[index].toFixed(2), 100, startY);
+        doc.text(data.corrente[index].toFixed(2), 150, startY);
+        doc.text(data.temperatura[index].toFixed(2), 190, startY);
+        startY += 10; // Incrementar posição para a próxima linha
+    });
+
+    // Adicionar rodapé
+    doc.setFontSize(10);
+    doc.text('Relatório gerado automaticamente por [Nome do Sistema]', 10, startY + 20);
+
+    // Salvar ou baixar o PDF
+    doc.save(`relatorio_sensores_${filters.timeRange}.pdf`);
+}
+
+// Função assíncrona para aplicar filtros e gerar o relatório
+async function applyFilters() {
+    // Coletar os filtros selecionados pelo usuário
+    const selectedTimeRange = document.getElementById('timeRange').value;
+    const filters = {
+        timeRange: selectedTimeRange,
+        day: document.getElementById('day').value,
+        month: document.getElementById('month').value,
+        week: document.getElementById('week').value,
+        year: document.getElementById('year').value,
+        monthWeek: document.getElementById('monthWeek').value
+    };
+
+    // Fetch os dados com base nos filtros aplicados
+    const data = await fetchData(filters);
+
+    // Atualizar os gráficos com base no intervalo de tempo selecionado
+    switch (selectedTimeRange) {
+        case 'day':
+            updateChartsDaily(data);
+            break;
+        case 'week':
+            updateChartsWeekly(data);
+            break;
+        case 'month':
+            updateChartsMonthly(data);
+            break;
+        default:
+            console.warn('Intervalo de tempo não reconhecido');
+    }
+
+    // Gerar o PDF com os dados filtrados
+    generatePDFReport(filters, data);
+}
+
+
+// Inicializar os gráficos ao carregar a página
+initCharts();

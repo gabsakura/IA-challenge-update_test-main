@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/dashboard.css') }}" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 </head>
 <body>
     {% include 'components/posHeader.html' %}
@@ -110,6 +112,8 @@
                 <canvas id="temperatureChart"></canvas>
             </div>
         </div>
+        <button id="generatePDF" onclick="generatePDF()">Gerar PDF</button>
+
     </div>
     <script src="{{ url_for('static', filename='scripts/dashboard.js') }}"></script>
     <script>
