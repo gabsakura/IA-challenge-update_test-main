@@ -1,118 +1,234 @@
-/* styles.css */
-
-/* Geral */
 /* Geral */
 body {
   font-family: 'Arial', sans-serif;
-  background-color: #121212; /* Cor de fundo escura */
-  color: #e0e0e0; /* Cor do texto clara */
+  background-color: #121212;
+  color: #e0e0e0;
   margin: 0;
   padding: 0;
-  height: 100%; /* Altura do body deve ser 100% */
+  scroll-behavior: smooth;
 }
 
 header {
-  background-color: #1f1f1f; /* Cor do cabeçalho */
+  background-color: #1f1f1f;
   color: white;
   padding: 20px;
 }
-/* Seção do vídeo */
-.video-section {
-  display: flex; /* Ativa o layout flexível */
-  flex-direction: column; /* Empilha o texto acima do vídeo */
-  justify-content: center; /* Centraliza verticalmente */
-  align-items: center; /* Centraliza horizontalmente */
-  height: 100vh; /* Cada seção ocupa 100% da altura da visualização */
-  margin: 0; /* Remove margens */
+
+/* Seção do logo */
+.logo-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #181717;
 }
 
-h2 {
+.logo-img {
+  height: auto;
+}
+
+/* Seção do vídeo */
+.video-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 60px 0;
+  background-color: #222222;
+}
+
+.video-section h2 {
   margin: 20px 0;
-  color: #ffffff; /* Cor do título */
-  text-align: center; /* Centraliza o texto */
+  color: #ffffff;
 }
 
 .video-container {
-  width: 60%; /* O vídeo ocupa 60% da largura da tela */
-  display: flex; /* Flexbox para centralizar o iframe */
-  justify-content: center; /* Centraliza horizontalmente o iframe */
+  width: 80%;
+  max-width: 800px;
 }
 
 .video-container iframe {
-  width: 100%; /* Para que o vídeo se ajuste à largura da caixa */
-  height: 450px; /* Altura do vídeo */
-  border-radius: 10px; /* Bordas arredondadas */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Sombra do vídeo */
-}
-
-/* Estilo principal */
-main {
-  padding: 0; /* Remove o preenchimento padrão do main */
+  width: 100%;
+  height: 450px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 /* Seção de integrantes */
 .integrantes {
   display: flex;
-  flex-direction: column; /* Organiza os filhos em coluna */
-  align-items: center; /* Centraliza os itens horizontalmente */
-  justify-content: center; /* Centraliza os itens verticalmente */
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  height: 100vh; /* Cada seção ocupa 100% da altura da visualização */
-  margin-top: 0; /* Remove o espaço acima da seção de integrantes */
+  padding: 60px 0;
 }
 
 .caixas {
   display: flex;
-  justify-content: center; /* Centraliza as caixas */
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
+  height: 100vh;
 }
 
 .Imagem-habilidade {
   position: relative;
   margin: 20px;
   cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s; /* Animação suave */
-}
-
-.Imagem-habilidade:hover {
-  transform: scale(1.05); /* Aumenta a imagem ao passar o mouse */
-  box-shadow: 0 8px 16px rgba(255, 255, 255, 0.3); /* Sombra mais intensa ao passar o mouse */
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .Imagem-habilidade img {
-  width: 150px; /* Ajuste conforme necessário */
-  height: auto;
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
   border-radius: 10px;
-  transition: transform 0.3s; /* Suaviza a transição da imagem */
+  border: 2px solid #333; /* Adicionando borda sutil */
 }
 
 .texto-habilidade {
   margin-top: 10px;
   font-weight: bold;
-  color: #007BFF; /* Cor do texto da habilidade */
+  color: #007BFF;
 }
 
 .contribuicoes {
-  display: none; /* Inicialmente escondido */
+  display: none;
   margin-top: 5px;
   font-size: 14px;
-  color: #b0b0b0; /* Cor do texto das contribuições */
+  color: #b0b0b0;
 }
 
 .frase-domino {
   margin-top: 20px;
-  font-style: italic; /* Estilo itálico para a frase */
-  color: #aaaaaa; /* Cor da frase */
+  font-style: italic;
+  color: #aaaaaa;
+}
+
+/* Botões */
+button {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:active {
+  background-color: #003f7f;
+}
+
+/* Inputs e forms */
+input[type="text"], input[type="password"] {
+  background-color: #333;
+  color: white;
+  border: 1px solid #444;
+  padding: 10px;
+  border-radius: 5px;
+  width: 100%;
+}
+
+input[type="text"]::placeholder, input[type="password"]::placeholder {
+  color: #888;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+/* Links */
+a {
+  color: #007BFF;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: #0056b3;
+}
+
+/* Animações */
+.hidden {
+  opacity: 0;
+  transform: translateX(-50px);
+  filter: blur(5px);
+  transition: all 1s ease;
+}
+
+.show {
+  opacity: 1;
+  transform: translateX(0);
+  filter: blur(0);
+}
+
+/* Seção sobre */
+.about-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+  background-color: #1f1f1f;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 1.5s ease, transform 1.5s ease;
+}
+
+.about-content {
+  max-width: 800px;
+  text-align: center;
+}
+
+.about-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.about-text {
+  margin: 10px 0;
+  line-height: 1.6;
+  color: #e0e0e0;
+}
+
+.about-text.highlight {
+  color: #007BFF;
+  font-weight: bold;
 }
 
 /* Responsividade */
 @media (max-width: 600px) {
+  .about-title {
+    font-size: 2rem;
+  }
+
+  .about-text {
+    font-size: 0.9rem;
+  }
+
+  .video-container iframe {
+    height: 250px;
+  }
+
   .caixas {
-    flex-direction: column; /* Empilha as caixas em telas menores */
-    align-items: center; /* Centraliza as caixas */
+    flex-direction: column;
+  }
+
+  .Imagem-habilidade img {
+    width: 150px;
+    height: 150px;
   }
 
   .Imagem-habilidade {
-    margin: 10px 0; /* Reduz o espaço entre as caixas */
+    margin: 10px 0;
   }
 }

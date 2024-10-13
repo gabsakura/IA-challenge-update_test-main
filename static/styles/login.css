@@ -1,5 +1,4 @@
-/* styles/login.css */
-
+/* styles/login.css / styles/register.css */
 body {
     background-color: #1f1f1f; /* Cor de fundo escura */
     color: #e0e0e0; /* Cor do texto */
@@ -33,4 +32,19 @@ h2 {
 
 #togglePassword {
     cursor: pointer; /* Muda o cursor para indicar que é clicável */
+}
+
+.form-box {
+    border: 1px solid #007BFF; /* Borda azul em volta da caixa */
+    padding: 2rem; /* Espaço interno da caixa */
+    background-color: #333333; /* Fundo da caixa */
+    border-radius: 10px; /* Bordas arredondadas da caixa */
+    width: 100%; /* Largura da caixa de login */
+    max-width: 500px; /* Tamanho máximo da caixa de login */
+}
+
+.toast {
+    background-color: #333333; /* Fundo do toast */
+    color: #e0e0e0; /* Cor do texto do toast */
+    border: 1px solid #007BFF; /* Borda do toast */
 }

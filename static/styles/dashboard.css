@@ -1,5 +1,3 @@
-/* dashboard.css */
-
 body {
     background-color: #1f1f1f;
     color: #e0e0e0;
@@ -12,23 +10,88 @@ body {
 }
 
 .filter-container {
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 20px;
-    text-align: center;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .filter-container select, 
 .filter-container button {
     padding: 10px;
-    margin-left: 10px;
+    margin: 0 5px;
     border-radius: 5px;
     border: none;
     background-color: #333;
     color: white;
 }
 
+#applyFilter {
+    background-color: #007bff;
+}
+
+#applyFilter:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos para centralizar e estilizar os filtros secundários */
+.filter-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 15px 0;
+    width: 100%;
+}
+
+.filter-item label,
+.filter-item select {
+    margin: 0 10px;
+}
+
+/* Filtros da semana lado a lado */
+#weekFilter .filter-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.filter-option label, 
+.filter-option select {
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 200px;
+    border-radius: 5px;
+    border: none;
+    background-color: #333;
+    color: white;
+}
+
+.filter-option select {
+    background-color: #444;
+    padding: 10px;
+}
+
+.filter-option input[type="date"] {
+    padding: 10px;
+    width: 200px;
+    border-radius: 5px;
+    border: none;
+    background-color: #444;
+    color: white;
+}
+
 .chart-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);  /* 2 gráficos por linha */
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     justify-items: center;
 }

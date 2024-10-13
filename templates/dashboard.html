@@ -18,13 +18,78 @@
         <!-- Dropdown para seleção do intervalo de tempo -->
         <div class="filter-container">
             <label for="timeRange">Escolha o intervalo de tempo:</label>
-            <select id="timeRange">
-                <option value="day">Dia</option>
-                <option value="week">Semana</option>
-                <option value="month">Mês</option>
-                <option value="year">Ano</option>
+            <div class="filter-item">
+                <select id="timeRange" onchange="updateFilters()">
+                    <option value="">Selecione...</option>
+                    <option value="day">Dia</option>
+                    <option value="week">Semana</option>
+                    <option value="month">Mês</option>
+                    <option value="year">Ano</option>
+                </select>
+                <button id="applyFilter">Aplicar Filtro</button>
+            </div>
+        </div>
+
+        <!-- Filtros Secundários -->
+        <div id="dayFilter" class="filter-option" style="display: none;">
+            <label for="day">Escolha o Dia:</label>
+            <input type="date" id="day">
+        </div>
+
+        <div id="weekFilter" class="filter-option" style="display: none;">
+            <div class="filter-item">
+                <label for="monthWeek">Escolha o Mês:</label>
+                <select id="monthWeek">
+                    <option value="janeiro">Janeiro</option>
+                    <option value="fevereiro">Fevereiro</option>
+                    <option value="marco">Março</option>
+                    <option value="abril">Abril</option>
+                    <option value="maio">Maio</option>
+                    <option value="junho">Junho</option>
+                    <option value="julho">Julho</option>
+                    <option value="agosto">Agosto</option>
+                    <option value="setembro">Setembro</option>
+                    <option value="outubro">Outubro</option>
+                    <option value="novembro">Novembro</option>
+                    <option value="dezembro">Dezembro</option>
+                </select>
+                <label for="week">Escolha a Semana:</label>
+                <select id="week">
+                    <option value="1">Semana 1</option>
+                    <option value="2">Semana 2</option>
+                    <option value="3">Semana 3</option>
+                    <option value="4">Semana 4</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="monthFilter" class="filter-option" style="display: none;">
+            <label for="month">Escolha o Mês:</label>
+            <select id="month">
+                <option value="janeiro">Janeiro</option>
+                <option value="fevereiro">Fevereiro</option>
+                <option value="marco">Março</option>
+                <option value="abril">Abril</option>
+                <option value="maio">Maio</option>
+                <option value="junho">Junho</option>
+                <option value="julho">Julho</option>
+                <option value="agosto">Agosto</option>
+                <option value="setembro">Setembro</option>
+                <option value="outubro">Outubro</option>
+                <option value="novembro">Novembro</option>
+                <option value="dezembro">Dezembro</option>
             </select>
-            <button id="applyFilter">Aplicar Filtro</button>
+        </div>
+
+        <div id="yearFilter" class="filter-option" style="display: none;">
+            <label for="year">Escolha o Ano:</label>
+            <select id="year">
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+            </select>
         </div>
 
         <div class="chart-grid">
@@ -47,5 +112,26 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='scripts/dashboard.js') }}"></script>
+    <script>
+        function updateFilters() {
+            const selectedOption = document.getElementById('timeRange').value;
+            // Ocultar todos os filtros
+            document.getElementById('dayFilter').style.display = 'none';
+            document.getElementById('weekFilter').style.display = 'none';
+            document.getElementById('monthFilter').style.display = 'none';
+            document.getElementById('yearFilter').style.display = 'none';
+
+            // Mostrar o filtro apropriado
+            if (selectedOption === 'day') {
+                document.getElementById('dayFilter').style.display = 'flex';
+            } else if (selectedOption === 'week') {
+                document.getElementById('weekFilter').style.display = 'flex';
+            } else if (selectedOption === 'month') {
+                document.getElementById('monthFilter').style.display = 'flex';
+            } else if (selectedOption === 'year') {
+                document.getElementById('yearFilter').style.display = 'flex';
+            }
+        }
+    </script>
 </body>
 </html>

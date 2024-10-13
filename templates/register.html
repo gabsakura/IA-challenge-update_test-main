@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,28 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/register.css') }}"> <!-- Link para o CSS adicional -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/login.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     {% include 'components/header.html' %}
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div class="w-50">
-            <h2 class="text-center mt-5">Criar Conta</h2>
-            <form method="POST" action="/register" class="mt-4">
+        <div class="form-box p-4 bg-dark text-light rounded">
+            <h2 class="text-center mb-4">Criar Conta</h2>
+            <form method="POST" action="/register">
                 <div class="mb-3">
-                    <label for="user">Nome de Usuário:</label>
-                    <input type="text" name="user" id="user" required class="form-control">
+                    <label for="user" class="form-label">Nome de Usuário</label>
+                    <input type="text" class="form-control" id="user" name="user" required>
                 </div>
                 <div class="mb-3">
-                    <label for="password">Senha:</label>
-                    <input type="password" name="password" id="password" required class="form-control"> 
+                    <label for="password" class="form-label">Senha</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <button type="button" id="togglePassword" class="btn btn-outline-secondary">🔒</button>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Registrar</button>
             </form>
-            <p class="text-center mt-3">Já tem uma conta? <a href="/login">Entre aqui</a></p>
+            <p class="text-center mt-3">Já tem uma conta? <a href="/login" class="text-primary">Entre aqui</a></p>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#togglePassword').click(function() {
+                const passwordInput = $('#password');
+                const passwordFieldType = passwordInput.attr('type');
+                if (passwordFieldType === 'password') {
+                    passwordInput.attr('type', 'text');
+                    $(this).text('🔓'); // Ícone para mostrar a senha
+                } else {
+                    passwordInput.attr('type', 'password');
+                    $(this).text('🔒'); // Ícone para esconder a senha
+                }
+            });
+        });
+    </script>
     {% include 'components/footer.html' %}
 </body>
 </html>

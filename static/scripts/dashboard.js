@@ -1,218 +1,186 @@
-document.addEventListener('DOMContentLoaded', () => {
-    let vibrationBaseChartInstance = null;
-    let vibrationBracoChartInstance = null;
-    let currentChartInstance = null;
-    let temperatureChartInstance = null;
+// Função para buscar os dados via AJAX
+async function fetchData(filters) {
+    const response = await fetch('/dados_graficos', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(filters)
+    });
+    const data = await response.json();
+    return data;
+}
 
-    const applyFilterBtn = document.getElementById('applyFilter');
-    applyFilterBtn.addEventListener('click', () => {
-        const timeRange = document.getElementById('timeRange').value;
-        fetchData(timeRange);
+// Função para inicializar os gráficos vazios
+function initCharts() {
+    // Gráfico de Vibração do Braço
+    const ctxVibrationBraco = document.getElementById('vibrationBracoChart').getContext('2d');
+    const vibrationBracoChart = new Chart(ctxVibrationBraco, {
+        type: 'line', // Mudança para gráfico de barras
+        data: {
+            labels: [], // Inicializa vazio
+            datasets: [{
+                label: 'Vibração do Braço',
+                data: [],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.5)', // Alteração para melhor visualização
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: { 
+                    beginAtZero: true 
+                },
+                y: { 
+                    beginAtZero: true 
+                }
+            }
+        }
     });
 
-    // Função para buscar os dados filtrados do backend
-    function fetchData(timeRange) {
-        fetch(`/api/dados?time_range=${timeRange}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    console.error("Erro no servidor:", data.error);
-                    return;
+    // Gráfico de Vibração da Base
+    const ctxVibrationBase = document.getElementById('vibrationBaseChart').getContext('2d');
+    const vibrationBaseChart = new Chart(ctxVibrationBase, {
+        type: 'line', // Mudança para gráfico de barras
+        data: {
+            labels: [], // Inicializa vazio
+            datasets: [{
+                label: 'Vibração da Base',
+                data: [],
+                borderColor: 'rgba(153, 102, 255, 1)',
+                backgroundColor: 'rgba(153, 102, 255, 0.5)', // Alteração para melhor visualização
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: { 
+                    beginAtZero: true 
+                },
+                y: { 
+                    beginAtZero: true 
                 }
-
-                console.log("Dados recebidos:", data);
-
-                const vibrationBaseData = {
-                    labels: data.tempo,
-                    datasets: [{
-                        label: 'Vibração Base',
-                        data: data.vibracao_base,
-                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1,
-                        fill: true
-                    }]
-                };
-
-                const vibrationBracoData = {
-                    labels: data.tempo,
-                    datasets: [{
-                        label: 'Vibração Braço',
-                        data: data.vibracao_braco,
-                        backgroundColor: 'rgba(255, 159, 64, 0.8)',
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1,
-                        fill: true
-                    }]
-                };
-
-                const correnteData = {
-                    labels: data.tempo,
-                    datasets: [{
-                        label: 'Corrente',
-                        data: data.corrente,
-                        backgroundColor: 'rgba(153, 102, 255, 0.8)',
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        borderWidth: 2,
-                        fill: true
-                    }]
-                };
-
-                const temperatureData = {
-                    labels: data.tempo,
-                    datasets: [{
-                        label: 'Temperatura',
-                        data: data.temperatura,
-                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 2,
-                        fill: true
-                    }]
-                };
-
-                loadCharts(vibrationBaseData, vibrationBracoData, correnteData, temperatureData);
-            })
-            .catch(error => console.error('Erro ao carregar dados:', error));
-    }
-
-    // Função para destruir o gráfico anterior, se existir
-    function destroyChart(chartInstance) {
-        if (chartInstance) {
-            chartInstance.destroy();
+            }
         }
+    });
+
+    // Gráfico de Corrente
+    const ctxCurrent = document.getElementById('currentChart').getContext('2d');
+    const currentChart = new Chart(ctxCurrent, {
+        type: 'line', // Mudança para gráfico de barras
+        data: {
+            labels: [], // Inicializa vazio
+            datasets: [{
+                label: 'Corrente',
+                data: [],
+                borderColor: 'rgba(255, 159, 64, 1)',
+                backgroundColor: 'rgba(255, 159, 64, 0.5)', // Alteração para melhor visualização
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: { 
+                    beginAtZero: true 
+                },
+                y: { 
+                    beginAtZero: true 
+                }
+            }
+        }
+    });
+
+    // Gráfico de Temperatura
+    const ctxTemperature = document.getElementById('temperatureChart').getContext('2d');
+    const temperatureChart = new Chart(ctxTemperature, {
+        type: 'line', // Mudança para gráfico de barras
+        data: {
+            labels: [], // Inicializa vazio
+            datasets: [{
+                label: 'Temperatura',
+                data: [],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.5)', // Alteração para melhor visualização
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: { 
+                    beginAtZero: true 
+                },
+                y: { 
+                    beginAtZero: true 
+                }
+            }
+        }
+    });
+
+    // Retornar as referências dos gráficos para atualizar depois
+    return {
+        vibrationBracoChart,
+        vibrationBaseChart,
+        currentChart,
+        temperatureChart
+    };
+}
+
+async function applyFilters() {
+    const selectedTimeRange = document.getElementById('timeRange').value;
+    const day = document.getElementById('day').value;
+    const month = document.getElementById('month').value;
+    const week = document.getElementById('week').value;
+    const year = document.getElementById('year').value;
+    const monthWeek = document.getElementById('monthWeek').value;
+
+    const filters = {
+        timeRange: selectedTimeRange,
+        day: selectedTimeRange === 'day' ? day : null,
+        month: selectedTimeRange === 'month' ? month : null,
+        week: selectedTimeRange === 'week' ? week : null,
+        year: selectedTimeRange === 'year' ? year : null,
+        monthWeek: selectedTimeRange === 'week' ? monthWeek : null // Adiciona monthWeek quando o filtro é "semana"
+    };
+
+    // Enviar os filtros para a rota do Flask e obter novos dados
+    const data = await fetchData(filters);
+
+    // Atualizar os gráficos com os novos dados
+    updateCharts(data);
+}
+
+
+// Função para atualizar os gráficos com os novos dados
+function updateCharts(data) {
+    // Verifica se os dados estão disponíveis
+    if (data && data.timestamp) {
+        // Atualizar gráfico de Vibração do Braço
+        vibrationBracoChart.data.labels = data.timestamp.map(ts => new Date(ts).toLocaleTimeString()); // Formatação das labels
+        vibrationBracoChart.data.datasets[0].data = data.vibracao_braco || [];
+        vibrationBracoChart.update();
+
+        // Atualizar gráfico de Vibração da Base
+        vibrationBaseChart.data.labels = data.timestamp.map(ts => new Date(ts).toLocaleTimeString()); // Formatação das labels
+        vibrationBaseChart.data.datasets[0].data = data.vibracao_base || [];
+        vibrationBaseChart.update();
+
+        // Atualizar gráfico de Corrente
+        currentChart.data.labels = data.timestamp.map(ts => new Date(ts).toLocaleTimeString()); // Formatação das labels
+        currentChart.data.datasets[0].data = data.corrente || [];
+        currentChart.update();
+
+        // Atualizar gráfico de Temperatura
+        temperatureChart.data.labels = data.timestamp.map(ts => new Date(ts).toLocaleTimeString()); // Formatação das labels
+        temperatureChart.data.datasets[0].data = data.temperatura || [];
+        temperatureChart.update();
+    } else {
+        console.error("Os dados fornecidos não são válidos:", data);
     }
+}
 
-    // Função para carregar os gráficos (tipo de gráfico: barras)
-    function loadCharts(vibrationBaseData, vibrationBracoData, correnteData, temperatureData) {
-        destroyChart(vibrationBaseChartInstance);
-        destroyChart(vibrationBracoChartInstance);
-        destroyChart(currentChartInstance);
-        destroyChart(temperatureChartInstance);
+// Inicializar os gráficos ao carregar a página
+const { vibrationBracoChart, vibrationBaseChart, currentChart, temperatureChart } = initCharts();
 
-        const zoomOptions = {
-            pan: {
-                enabled: true,
-                mode: 'x',
-                speed: 20,
-                threshold: 10
-            },
-            zoom: {
-                wheel: {
-                    enabled: true
-                },
-                drag: {
-                    enabled: true
-                },
-                mode: 'x',
-                speed: 0.1
-            }
-        };
-
-        // Gráfico de Barras - Vibração Base
-        const ctxVibrationBase = document.getElementById('vibrationBaseChart').getContext('2d');
-        vibrationBaseChartInstance = new Chart(ctxVibrationBase, {
-            type: 'bar',
-            data: vibrationBaseData,
-            options: {
-                responsive: true,
-                plugins: {
-                    zoom: zoomOptions
-                },
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            tooltipFormat: 'dd/MM/yyyy HH:mm',
-                            displayFormats: { day: 'dd/MM' }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Gráfico de Barras - Vibração Braço
-        const ctxVibrationBraco = document.getElementById('vibrationBracoChart').getContext('2d');
-        vibrationBracoChartInstance = new Chart(ctxVibrationBraco, {
-            type: 'bar',
-            data: vibrationBracoData,
-            options: {
-                responsive: true,
-                plugins: {
-                    zoom: zoomOptions
-                },
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            tooltipFormat: 'dd/MM/yyyy HH:mm',
-                            displayFormats: { day: 'dd/MM' }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Gráfico de Barras - Corrente
-        const ctxCurrent = document.getElementById('currentChart').getContext('2d');
-        currentChartInstance = new Chart(ctxCurrent, {
-            type: 'bar',
-            data: correnteData,
-            options: {
-                responsive: true,
-                plugins: {
-                    zoom: zoomOptions
-                },
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            tooltipFormat: 'dd/MM/yyyy HH:mm',
-                            displayFormats: { day: 'dd/MM' }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Gráfico de Barras - Temperatura
-        const ctxTemperature = document.getElementById('temperatureChart').getContext('2d');
-        temperatureChartInstance = new Chart(ctxTemperature, {
-            type: 'bar',
-            data: temperatureData,
-            options: {
-                responsive: true,
-                plugins: {
-                    zoom: zoomOptions
-                },
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            tooltipFormat: 'dd/MM/yyyy HH:mm',
-                            displayFormats: { day: 'dd/MM' }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-
-    // Carregar os gráficos iniciais com o intervalo 'day'
-    fetchData('day');
-});
+// Adicionar o evento de clique ao botão "Aplicar Filtro"
+document.getElementById('applyFilter').addEventListener('click', applyFilters);
