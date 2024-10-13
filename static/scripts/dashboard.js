@@ -13,119 +13,110 @@ async function fetchData(filters) {
 
 // Função para inicializar os gráficos vazios
 function initCharts() {
-    // Gráfico de Vibração do Braço
     const ctxVibrationBraco = document.getElementById('vibrationBracoChart').getContext('2d');
     const vibrationBracoChart = new Chart(ctxVibrationBraco, {
-        type: 'line', // Mudança para gráfico de barras
+        type: 'line',
         data: {
-            labels: [], // Inicializa vazio
+            labels: [],
             datasets: [{
                 label: 'Vibração do Braço',
                 data: [],
                 borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.5)', // Alteração para melhor visualização
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
                 borderWidth: 1
             }]
         },
         options: {
             scales: {
-                x: { 
-                    beginAtZero: true 
+                x: {
+                    beginAtZero: true
                 },
-                y: { 
-                    beginAtZero: true 
+                y: {
+                    beginAtZero: true
                 }
             }
         }
     });
 
-    // Gráfico de Vibração da Base
     const ctxVibrationBase = document.getElementById('vibrationBaseChart').getContext('2d');
     const vibrationBaseChart = new Chart(ctxVibrationBase, {
-        type: 'line', // Mudança para gráfico de barras
+        type: 'line',
         data: {
-            labels: [], // Inicializa vazio
+            labels: [],
             datasets: [{
                 label: 'Vibração da Base',
                 data: [],
                 borderColor: 'rgba(153, 102, 255, 1)',
-                backgroundColor: 'rgba(153, 102, 255, 0.5)', // Alteração para melhor visualização
+                backgroundColor: 'rgba(153, 102, 255, 0.5)',
                 borderWidth: 1
             }]
         },
         options: {
             scales: {
-                x: { 
-                    beginAtZero: true 
+                x: {
+                    beginAtZero: true
                 },
-                y: { 
-                    beginAtZero: true 
+                y: {
+                    beginAtZero: true
                 }
             }
         }
     });
 
-    // Gráfico de Corrente
     const ctxCurrent = document.getElementById('currentChart').getContext('2d');
     const currentChart = new Chart(ctxCurrent, {
-        type: 'line', // Mudança para gráfico de barras
+        type: 'line',
         data: {
-            labels: [], // Inicializa vazio
+            labels: [],
             datasets: [{
                 label: 'Corrente',
                 data: [],
                 borderColor: 'rgba(255, 159, 64, 1)',
-                backgroundColor: 'rgba(255, 159, 64, 0.5)', // Alteração para melhor visualização
+                backgroundColor: 'rgba(255, 159, 64, 0.5)',
                 borderWidth: 1
             }]
         },
         options: {
             scales: {
-                x: { 
-                    beginAtZero: true 
+                x: {
+                    beginAtZero: true
                 },
-                y: { 
-                    beginAtZero: true 
+                y: {
+                    beginAtZero: true
                 }
             }
         }
     });
 
-    // Gráfico de Temperatura
     const ctxTemperature = document.getElementById('temperatureChart').getContext('2d');
     const temperatureChart = new Chart(ctxTemperature, {
-        type: 'line', // Mudança para gráfico de barras
+        type: 'line',
         data: {
-            labels: [], // Inicializa vazio
+            labels: [],
             datasets: [{
                 label: 'Temperatura',
                 data: [],
                 borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.5)', // Alteração para melhor visualização
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
                 borderWidth: 1
             }]
         },
         options: {
             scales: {
-                x: { 
-                    beginAtZero: true 
+                x: {
+                    beginAtZero: true
                 },
-                y: { 
-                    beginAtZero: true 
+                y: {
+                    beginAtZero: true
                 }
             }
         }
     });
 
-    // Retornar as referências dos gráficos para atualizar depois
-    return {
-        vibrationBracoChart,
-        vibrationBaseChart,
-        currentChart,
-        temperatureChart
-    };
+    return { vibrationBracoChart, vibrationBaseChart, currentChart, temperatureChart };
 }
 
+// Função para aplicar os filtros
 async function applyFilters() {
     const selectedTimeRange = document.getElementById('timeRange').value;
     const day = document.getElementById('day').value;
@@ -140,38 +131,47 @@ async function applyFilters() {
         month: selectedTimeRange === 'month' ? month : null,
         week: selectedTimeRange === 'week' ? week : null,
         year: selectedTimeRange === 'year' ? year : null,
-        monthWeek: selectedTimeRange === 'week' ? monthWeek : null // Adiciona monthWeek quando o filtro é "semana"
+        monthWeek: selectedTimeRange === 'week' ? monthWeek : null
     };
 
-    // Enviar os filtros para a rota do Flask e obter novos dados
     const data = await fetchData(filters);
-
-    // Atualizar os gráficos com os novos dados
-    updateCharts(data);
+    updateCharts(data, selectedTimeRange);  // Passa o intervalo de tempo
 }
 
-
-// Função para atualizar os gráficos com os novos dados
-function updateCharts(data) {
-    // Verifica se os dados estão disponíveis
+// Função para atualizar os gráficos com base no intervalo de tempo selecionado
+function updateCharts(data, timeRange) {
     if (data && data.timestamp) {
-        // Atualizar gráfico de Vibração do Braço
-        vibrationBracoChart.data.labels = data.timestamp.map(ts => new Date(ts).toLocaleTimeString()); // Formatação das labels
+        let labelFormat;
+        switch (timeRange) {
+            case 'day':
+                labelFormat = ts => new Date(ts).toLocaleTimeString();  // Exibe horas
+                break;
+            case 'week':
+                labelFormat = ts => new Date(ts).toLocaleDateString();  // Exibe dias
+                break;
+            case 'month':
+                labelFormat = ts => `Semana ${getWeekOfMonth(new Date(ts))}`;  // Exibe semanas do mês
+                break;
+            case 'year':
+                labelFormat = ts => new Date(ts).toLocaleString('default', { month: 'short' });  // Exibe meses
+                break;
+            default:
+                labelFormat = ts => new Date(ts).toLocaleString();  // Exibe data completa como fallback
+        }
+
+        vibrationBracoChart.data.labels = data.timestamp.map(labelFormat);
         vibrationBracoChart.data.datasets[0].data = data.vibracao_braco || [];
         vibrationBracoChart.update();
 
-        // Atualizar gráfico de Vibração da Base
-        vibrationBaseChart.data.labels = data.timestamp.map(ts => new Date(ts).toLocaleTimeString()); // Formatação das labels
+        vibrationBaseChart.data.labels = data.timestamp.map(labelFormat);
         vibrationBaseChart.data.datasets[0].data = data.vibracao_base || [];
         vibrationBaseChart.update();
 
-        // Atualizar gráfico de Corrente
-        currentChart.data.labels = data.timestamp.map(ts => new Date(ts).toLocaleTimeString()); // Formatação das labels
+        currentChart.data.labels = data.timestamp.map(labelFormat);
         currentChart.data.datasets[0].data = data.corrente || [];
         currentChart.update();
 
-        // Atualizar gráfico de Temperatura
-        temperatureChart.data.labels = data.timestamp.map(ts => new Date(ts).toLocaleTimeString()); // Formatação das labels
+        temperatureChart.data.labels = data.timestamp.map(labelFormat);
         temperatureChart.data.datasets[0].data = data.temperatura || [];
         temperatureChart.update();
     } else {
@@ -179,8 +179,11 @@ function updateCharts(data) {
     }
 }
 
-// Inicializar os gráficos ao carregar a página
-const { vibrationBracoChart, vibrationBaseChart, currentChart, temperatureChart } = initCharts();
+// Função auxiliar para obter a semana do mês
+function getWeekOfMonth(date) {
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+    return Math.ceil((date.getDate() + firstDay) / 7);
+}
 
-// Adicionar o evento de clique ao botão "Aplicar Filtro"
+const { vibrationBracoChart, vibrationBaseChart, currentChart, temperatureChart } = initCharts();
 document.getElementById('applyFilter').addEventListener('click', applyFilters);

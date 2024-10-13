@@ -42,7 +42,6 @@ def consulta(sql_: str='', pre_comando: str = '', dia_: str='', mes_: str='', an
 
     print(sql)
     print("----------------------")
-    # Mude o nome do banco de dados aqui
     conexao = sqlite3.connect('instance/dados.db')
     c = conexao.cursor()
     c.execute(sql)
@@ -50,7 +49,7 @@ def consulta(sql_: str='', pre_comando: str = '', dia_: str='', mes_: str='', an
     conexao.close()
     print("Requisição feita \n----------------------")
     
-    print(resposta)  # Adicione esta linha para ver o que a função está retornando
+    print(resposta)
     return resposta
 
 class Motor:
@@ -63,12 +62,10 @@ class Motor:
         self.horas_fator = 0            # Horas previstas de operação até falha
 
     def calcular_vida_util(self):
-        # Cálculo dos fatores de impacto
         fator_temperatura = 1 + max(0, (self.temperatura - 80) / 10)  # Aumento a partir de 80°C
         fator_corrente = 1 + max(0, (self.corrente - 2) / 0.5)        # Aumento a partir de 2A
         fator_vibracao = 1 + max(0, (self.vibracao - 5) / 2)          # Aumento a partir de 5 mm/s²
 
-        # Calculando a vida útil com base nos fatores
         self.horas_fator = self.vida_util_base_horas / (fator_temperatura * fator_corrente * fator_vibracao)
 
     def calcular_chance_falha(self):
@@ -98,7 +95,6 @@ class BracoRobotico:
     def calcular_chance_total_falha(self):
         chances = [motor.calcular_chance_falha() for motor in self.motores]
         menor_tempo_falha = min(chances)
-        # A chance total de falha é calculada considerando a menor vida útil entre os motores
         if menor_tempo_falha < 0:
             return "Chance de falha do braço: 100.00%"
         elif menor_tempo_falha < 1:
@@ -108,7 +104,6 @@ class BracoRobotico:
             return f"Chance de falha do braço: {chance_falha_braco:.2f}%"
 
     def prever_falhas(self):
-        # Prever falhas para cada motor
         previsoes = [motor.previsao_falha() for motor in self.motores]
         return previsoes
 
@@ -142,12 +137,44 @@ def previsao(dia: str = '08', mes: str = '10', ano: str = '2024', msg_auto: bool
     print(dados)
     temperatura, corrente, vibracao_base, vibracao_braco = dados[0]
 
-    # Inicializar o braço robótico com os dados extraídos
     braco = BracoRobotico(temperatura, corrente, [vibracao_base, vibracao_braco])
 
-    # Prever falhas para cada motor e imprimir
     previsoes = braco.prever_falhas()
     return braco.calcular_chance_total_falha(), previsoes
 
 def meses():
     return consulta("SELECT DISTINCT strftime('%m', data_registro) AS mes FROM dados WHERE data_registro IS NOT NULL ORDER BY mes;")
+
+def fetch_data(filters):
+    query = "SELECT"
+    if filters['timeRange'] == 'day':
+        query += " strftime('%H', data_registro) AS time,"
+    elif filters['timeRange'] == 'week':
+        query += " strftime('%d', data_registro) AS time,"
+    elif filters['timeRange'] == 'month':
+        query += " strftime('%W', data_registro) AS time,"
+    elif filters['timeRange'] == 'year':
+        query += " strftime('%m', data_registro) AS time,"
+    
+    query += """
+        AVG(vibracao_braco) AS vibracao_braco,
+        AVG(vibracao_base) AS vibracao_base,
+        AVG(corrente) AS corrente,
+        AVG(temperatura) AS temperatura
+        FROM dados
+    """
+    
+    if filters['timeRange'] == 'day':
+        query += " WHERE strftime('%Y-%m-%d', data_registro) = '{}'".format(filters['day'])
+    elif filters['timeRange'] == 'week':
+        query += " WHERE strftime('%Y-%W', data_registro) = '{}'".format(filters['week'])
+    elif filters['timeRange'] == 'month':
+        query += " WHERE strftime('%Y-%m', data_registro) = '{}'".format(filters['month'])
+    elif filters['timeRange'] == 'year':
+        query += " WHERE strftime('%Y', data_registro) = '{}'".format(filters['year'])
+
+    query += " GROUP BY time ORDER BY time ASC"
+    
+    data = consulta(query)
+    print("Dados retornados pela consulta:", data)
+    return data
