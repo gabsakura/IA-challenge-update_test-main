@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monday - Chatbot IA</title>
+    <title>FailGuard - AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/chat.css') }}" />
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/chat.css') }}" />
+   
 </head>
-<body
-    {% include 'components/posHeader.html' %}>
+
+<body>
+    {% include 'components/posHeader.html' %}
     <div class="container-fluid h-100">
         <div class="row justify-content-center h-100">
             <div class="col-md-8 col-xl-6 chat">
                 <div class="card">
                     <div class="card-header msg_head">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex bd-highlight">
                             <div class="img_cont">
-                                <img src="img/projeto.avif" class="rounded-circle user_img" />
+                                <img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png"
+                                    class="rounded-circle user_img" />
+                                <span class="online_icon"></span>
                             </div>
                             <div class="user_info">
                                 <span>Monday</span>
@@ -29,11 +34,13 @@
                     </div>
                     <div id="messageFormeight" class="card-body msg_card_body"></div>
                     <div class="card-footer">
+                        <div id="loading"></div>
                         <form id="messageArea" class="input-group">
-                            <input type="text" id="text" name="msg" placeholder="Digite sua mensagem..." autocomplete="off" class="form-control type_msg" required />
+                            <input type="text" id="text" name="msg" placeholder="Digite sua mensagem..."
+                                autocomplete="off" class="form-control type_msg" required />
                             <div class="input-group-append">
-                                <button type="submit" id="send" class="btn send_btn">
-                                    <i class="fas fa-arrow-up"></i>
+                                <button type="submit" id="send" class="input-group-text send_btn">
+                                    <i class="fas fa-location-arrow"></i>
                                 </button>
                             </div>
                         </form>
@@ -41,7 +48,100 @@
                 </div>
             </div>
         </div>
-        <script src="{{ url_for('static', filename='scripts/chat.js') }}"></script>
     </div>
+
+    <script>
+        function scrollToBottom() {
+            var messageBody = document.getElementById("messageFormeight");
+            messageBody.scrollTop = messageBody.scrollHeight;
+        }
+    
+        function createDownloadLink(url) {
+            return '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' +
+                'Arquivo PDF: <a href="' + url + '" target="_blank" style="color: #fff; text-decoration: underline;">Baixar</a>' +
+                '</div></div>';
+        }
+    
+        function formatText(text) {
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+    
+        function fetchAutoResponse() {
+            $.ajax({
+                type: "GET",
+                url: "/auto",
+            }).done(function (data) {
+                const formattedText = formatText(data).replace(/\n/g, "<br>");
+                const date = new Date();
+                const hour = date.getHours();
+                const minute = date.getMinutes();
+                const str_time = hour + ":" + (minute < 10 ? '0' + minute : minute);
+                
+                var botHtml =
+                    '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' +
+                    formattedText +
+                    '<span class="msg_time">' +
+                    str_time +
+                    '</span></div></div>';
+    
+                $("#messageFormeight").append($.parseHTML(botHtml));
+                scrollToBottom();
+            });
+        }
+    
+        $(document).ready(function () {
+            // Chama a função fetchAutoResponse a cada 5 minutos
+            setInterval(fetchAutoResponse, 300000); // 300000 ms = 5 minutos
+    
+            $("#messageArea").on("submit", function (event) {
+                event.preventDefault();
+    
+                const rawText = $("#text").val();
+                const formattedText = formatText(rawText).replace(/\n/g, "<br>");
+                $("#text").val("");
+    
+                const date = new Date();
+                const hour = date.getHours();
+                const minute = date.getMinutes();
+                const str_time = hour + ":" + (minute < 10 ? '0' + minute : minute);
+                
+                var userHtml =
+                    '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' +
+                    formattedText +
+                    '<span class="msg_time_send">' +
+                    str_time +
+                    '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
+    
+                $("#messageFormeight").append(userHtml);
+                scrollToBottom();
+    
+                $("#loading").show();
+    
+                $.ajax({
+                    data: { msg: rawText },
+                    type: "POST",
+                    url: "/get",
+                }).done(function (data) {
+                    $("#loading").hide();
+    
+                    let botHtml;
+                    if (data.startsWith('http') && data.endsWith('.pdf')) {
+                        botHtml = createDownloadLink(data); // Cria o link de download
+                    } else {
+                        botHtml =
+                            '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' +
+                            formatText(data).replace(/\n/g, "<br>") +
+                            '<span class="msg_time">' +
+                            str_time +
+                            '</span></div></div>';
+                    }
+    
+                    $("#messageFormeight").append($.parseHTML(botHtml));
+                    scrollToBottom();
+                });
+            });
+        });
+    </script>
 </body>
+
 </html>
