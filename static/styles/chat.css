@@ -87,13 +87,18 @@ body, html {
 }
 .img_cont {
     position: relative;
+
     height: 70px;
     width: 70px;
 }
-.img_cont_msg {
-    height: 40px;
-    width: 40px;
+.img_cont img {
+    height: 70px;
+    width: 70px;
+    object-fit: cover; /* Mantém a proporção da imagem */
+    border-radius: 50%; /* Deixa a imagem redonda */
+    display: block; /* Remove espaçamentos adicionais */
 }
+
 .online_icon {
     position: absolute;
     height: 15px;

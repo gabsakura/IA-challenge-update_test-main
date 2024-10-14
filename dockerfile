@@ -1,20 +1,28 @@
-# Usar a imagem oficial do Python como base
-FROM python:3.8-slim
+FROM python:3.10-slim
 
-# Definir o diretório de trabalho na imagem
+# Atualizar pacotes do sistema e instalar dependências de build essenciais
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    libpq-dev \
+    && apt-get clean
+
+# Definir o diretório de trabalho
 WORKDIR /app
 
-# Copiar o arquivo de requisitos para instalar as dependências
+# Copiar o requirements.txt
 COPY requirements.txt .
 
-# Instalar as dependências
-RUN pip install --no-cache-dir -r requirements.txt || { echo 'Falha na instalação de dependências'; exit 1; }
+# Instalar as dependências do Python
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar todos os arquivos e pastas da aplicação para o diretório de trabalho
 COPY . .
 
-# Expor a porta que a aplicação irá rodar
-EXPOSE 5000 
+# Expor a porta (se necessário para aplicações web, como Flask)
+EXPOSE 5001
 
-# Comando para executar a aplicação
-CMD ["python", "app.py"]  # Altere 'app.py' se seu arquivo principal for outro
+# Comando para rodar a aplicação
+CMD ["python", "app.py"]
