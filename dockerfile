@@ -1,28 +1,20 @@
-# Usar uma imagem base do Python 3.9
-FROM python:3.9-slim
+# Usar a imagem oficial do Python como base
+FROM python:3.8-slim
 
-# Instalar bash e outras dependências necessárias
-RUN apt-get update && apt-get install -y bash
-
-# Definir o diretório de trabalho
+# Definir o diretório de trabalho na imagem
 WORKDIR /app
 
-# Copiar o arquivo de dependências (requirements.txt)
-COPY requirements.txt ./
+# Copiar o arquivo de requisitos para instalar as dependências
+COPY requirements.txt .
 
 # Instalar as dependências
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt || { echo 'Falha na instalação de dependências'; exit 1; }
 
-# Copiar o banco de dados para o contêiner
-COPY dados.db ./
-
-
-COPY modelo.pkl ./
-# Copiar o restante do código da aplicação para o contêiner
+# Copiar todos os arquivos e pastas da aplicação para o diretório de trabalho
 COPY . .
 
-# Expor a porta da API
-EXPOSE 5000
+# Expor a porta que a aplicação irá rodar
+EXPOSE 5000 
 
-# Comando para rodar a aplicação Python
-CMD ["python", "app.py"]
+# Comando para executar a aplicação
+CMD ["python", "app.py"]  # Altere 'app.py' se seu arquivo principal for outro
