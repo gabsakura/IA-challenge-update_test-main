@@ -308,5 +308,169 @@ async function applyFilters() {
 }
 
 
+
+async function generatePDFReport(filters, data, imagePath) {
+    // Carregar a biblioteca jsPDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF(); // Instância do jsPDF
+
+    const reportData = {
+        filters: filters,
+        data: data
+    };
+
+    const response = await fetch('/pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reportData)
+    });
+
+    const pdfContent = await response.text(); // Supondo que a resposta seja um texto
+    const lines = pdfContent.split('\n'); // Divide o texto em linhas
+    let yPosition = 50; // Posição Y inicial após a imagem
+    const lineHeight = 10; // Altura da linha
+    const spacing = 10; // Espaçamento entre as seções
+    const pageWidth = doc.internal.pageSize.getWidth(); // Largura da página
+    const pageHeight = doc.internal.pageSize.getHeight(); // Altura da página
+
+    // Lista de linhas que devem estar em negrito
+    const boldList = [
+        'Relatório Técnico',
+        '1. Identificação da Máquina',
+        '2. Resumo Executivo',
+        '3. Descrição Técnica da Máquina',
+        'Especificações Técnicas: ',
+        '3.1. Estrutura Mecânica',
+        '3.2. Motores de Passo',
+        '3.3. Sensores',
+        'Sensor de Corrente (ACS712):',
+        'Sensor de Vibração (MPU6050):',
+        'Sensor de Temperatura (AMG8833):',
+        '3.4. Microcontroladores',
+        '3.5. Fonte de Alimentação',
+        '3.6. Software',
+        '4. Histórico de Operação',
+        '5. Procedimentos de Inspeção ou Manutenção',
+        '6. Diagnóstico e Condição da Máquina',
+        '7. Recomendações',
+        '8. Conclusão'
+    ];
+
+    // Função para converter a imagem em Base64 e obter as dimensões
+    async function getImageAndDimensions(imagePath) {
+        const response = await fetch(imagePath);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const img = new Image();
+                img.src = reader.result;
+                img.onload = () => {
+                    resolve({
+                        base64: reader.result,
+                        width: img.width,
+                        height: img.height
+                    });
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    // Carregar a imagem e obter as dimensões originais
+    const { base64: imgData, width: imgOriginalWidth, height: imgOriginalHeight } = await getImageAndDimensions("static/images/logo_pdf.png");
+
+    // Definir o tamanho máximo permitido (ajustável) mantendo a proporção
+    const maxWidth = pageWidth - 20; // Margens de 10px em cada lado
+    const maxHeight = 50; // Altura máxima desejada
+
+    // Calcular o fator de escala para manter as proporções
+    let scale = Math.min(maxWidth / imgOriginalWidth, maxHeight / imgOriginalHeight);
+    const imgWidth = imgOriginalWidth * scale;
+    const imgHeight = imgOriginalHeight * scale;
+
+    // Calcular a posição X para centralizar a imagem
+    const xPosition = (pageWidth - imgWidth) / 2;
+
+    // Adiciona a imagem ao topo da página mantendo as proporções
+    doc.addImage(imgData, 'PNG', xPosition, 10, imgWidth, imgHeight); // Adiciona a imagem (x, y, width, height)
+
+    // Função para adicionar linhas ao PDF
+    function addLines(lines) {
+        lines.forEach((line) => {
+            const trimmedLine = line.trim(); // Remove espaços em branco
+
+            // Verifica se a linha atual está na lista de negrito
+            if (boldList.includes(trimmedLine)) {
+                yPosition += spacing; // Adiciona uma linha em branco antes da frase em negrito
+
+                doc.setFont("helvetica", "bold"); // Define a fonte como negrito
+            } else {
+                doc.setFont("helvetica", "normal"); // Define a fonte como normal
+            }
+
+            // Quebra o texto para caber na largura da página
+            const splitLines = doc.splitTextToSize(line, pageWidth - 20); // Margens de 10px de cada lado
+
+            splitLines.forEach((splitLine) => {
+                // Adiciona a linha ao PDF
+                doc.text(splitLine, 10, yPosition);
+                yPosition += lineHeight; // Incrementa a posição Y
+
+                // Verifica se a posição Y excede a altura da página
+                if (yPosition > doc.internal.pageSize.getHeight() - 20) { // Margem inferior
+                    doc.addPage(); // Adiciona uma nova página
+                    yPosition = 10; // Reinicia a posição Y
+                }
+            });
+        });
+    }
+
+    // Adiciona as linhas ao PDF
+    addLines(lines);
+
+    doc.save('relatorio.pdf'); // Salva o PDF
+}
+
+
+// Função assíncrona para aplicar filtros e gerar o relatório
+async function applyFilters() {
+    // Coletar os filtros selecionados pelo usuário
+    const selectedTimeRange = document.getElementById('timeRange').value;
+    const filters = {
+        timeRange: selectedTimeRange,
+        day: document.getElementById('day').value,
+        month: document.getElementById('month').value,
+        week: document.getElementById('week').value,
+        year: document.getElementById('year').value,
+        monthWeek: document.getElementById('monthWeek').value
+    };
+
+    // Fetch os dados com base nos filtros aplicados
+    const data = await fetchData(filters);
+
+    // Atualizar os gráficos com base no intervalo de tempo selecionado
+    switch (selectedTimeRange) {
+        case 'day':
+            updateChartsDaily(data);
+            break;
+        case 'week':
+            updateChartsWeekly(data);
+            break;
+        case 'month':
+            updateChartsMonthly(data);
+            break;
+        default:
+            console.warn('Intervalo de tempo não reconhecido');
+    }
+
+    // Gerar o PDF com os dados filtrados
+    generatePDFReport(filters, data);
+}
+
 // Inicializar os gráficos ao carregar a página
 initCharts();

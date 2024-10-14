@@ -80,70 +80,102 @@ Substitua qualquer motor danificado ou sobreaquecido antes de retomar as operaç
 """
 
 formato_pdf = f"""
+[Não exiba essa linha. Caso o usuário peça esse relatório em outro idioma, traduza o relatório para esse idioma]
 Relatório Técnico
-Data: [Data, no formato dia/mês/ano, em que o relatório foi gerado]
+Data do Relatório: [Dia de hoje, no formato dia/mês/ano]
 Empresa/Organização: FIAP em parceria com a Reply
-Nome do Técnico ou Engenheiro Responsável: [Seu nome] + Grupo FailGuard
-
+Nome do Técnico ou Engenheiro Responsável: [Seu nome] + Grupo Failguard
 1. Identificação da Máquina
 Nome/Modelo da Máquina: BR-FGRF
 Número de Série: 2512A
 Localização: Linha de Montagem
-
 2. Resumo Executivo
-Objetivo do Relatório: [Descreva o objetivo do relatório, considerando os dados apresentados e os dias que tiveram limites ultrapassado, e que, quanto mais próximo do limite uma leitura for, mais dados durante o dia, ou o mês, passaram aquela limite.]
-
-Principais Constatações: [Fale das principais constatações, considerando os dados apresentados e os dias que tiveram limites ultrapassado, e que, quanto mais próximo do limite uma leitura for, mais dados durante o dia, ou o mês, passaram aquela limite.]
-
+- Objetivo do Relatório: [Descreva o objetivo do relatório, considerando o período de tempo analisado (diário, semanal, mensal ou anual), o desempenho da máquina e possíveis desvios nos limites operacionais. Quanto mais próximos os dados estiverem dos limites, mais relevante será o detalhamento das ocorrências e mais leituras ultrapassaram o limite.]
+- Principais Constatações: [Descreva as principais constatações sobre o desempenho da máquina no período em questão. Destaque dias ou ciclos em que os limites foram ultrapassados, observando a frequência e a gravidade dessas ocorrências.]
 3. Descrição Técnica da Máquina
-Especificações Técnicas: O braço é equipado com 4 motores de passo.
-Componentes:
-
-Motores de passo - Nema 17
-Câmera térmica para monitoramento da temperatura - AMG88xx
-Sensores de vibração - MPU6050
-Sensor de corrente elétrica - ACS712
-Controlador de movimento - Arduino Mega / CNC Shield
-Sistema de comunicação - Esp32
+Especificações Técnicas: 
+3.1. Estrutura Mecânica
+- Eixos: 3 eixos controlados individualmente por motores de passo.
+- Material: Estrutura de plástico.
+- Capacidade de carga: Entre 1 kg a 5 kg.
+3.2. Motores de Passo
+Quantidade: 4 motores de passo controlados pelo CNC Shield.
+Drivers: DRV8825 ou A4988 para controle dos motores.
+Resolução: 1,8° por passo, com microstepping configurável.
+Tensão de operação: 12V a 24V.
+Corrente nominal: Dependendo do motor, entre 1.2A e 2.8A por fase.
+3.3. Sensores
+Sensor de Corrente (ACS712):
+Faixa de medição: ±5A, ±20A ou ±30A, conforme o modelo.
+Precisão: ±1.5%.
+Interface: Analógica, leitura via Arduino Mega.
+Sensor de Vibração (MPU6050):
+Tipo: Acelerômetro e giroscópio.
+Faixa de medição (acelerômetro): ±2g, ±4g, ±8g, ±16g.
+Faixa de medição (giroscópio): ±250, ±500, ±1000, ±2000 °/s.
+Interface: I2C, conectado ao ESP32.
+Sensor de Temperatura (AMG8833):
+Tipo: Matriz de sensores de infravermelho.
+Faixa de medição: 0°C a 80°C.
+Precisão: ±2.5°C.
+Interface: I2C, conectado ao ESP32
+3.4. Microcontroladores
+Controle do Braço:
+Microcontrolador: Arduino Mega.
+Controle dos motores: Através de CNC Shield, utilizando drivers para motores de passo.
+Envio de Dados:
+Microcontrolador: ESP32.
+Comunicação: Wi-Fi para enviar os dados coletados dos sensores para o banco de dados.
+Interface com sensores: I2C e analógico.
+3.5. Fonte de Alimentação
+Tensão de operação: 12V a 24V.
+Corrente: 5A a 10A (variável conforme os motores e sensores).
+3.6. Software
+ - Controle dos motores: Através de bibliotecas de controle de CNC ou motor de passo no Arduino Mega.
+ - Coleta de Dados: O Arduino Mega coleta os dados dos sensores e envia para o ESP32.
+ - Envio para o banco de dados: O ESP32 transmite os dados via Wi-Fi.
+Componentes Principais:
+    Câmera térmica para monitoramento da temperatura - AMG88xx
+    Sensores de vibração - MPU6050
+    Sensor de corrente elétrica - ACS712
+    Controlador de movimento - Arduino Mega / CNC Shield
+    Sistema de comunicação - Esp32
 4. Histórico de Operação
-Horas de Trabalho: 26.5 horas
-Ciclos de Operação: 300 ciclos realizados
-
+Horas de Trabalho: 117 Horas
+Ciclos de Operação: 12.037 Ciclos
 Condições de Operação:
-
-Temperatura ambiente: 25°C
-Temperatura média do braço durante a operação: [Temperatura do braço]
-Corrente média do braço: [Corrente do braço]
-Vibração da base: [Vibração da base]
-Vibração do braço: [Vibração do braço]
-Dias com limites de leitura ultrapassados:
-
-[Insira em formato de lista e em ordem crescente, por exemplo:
--07/10/2024
--18/10/2024]
-[Caso a quantidade de dias em sequência seja maior que 4, faça da seguinte forma:
--07/10/2024...20/10/2024]
+Temperatura ambiente média: 25°C
+Temperatura média do braço: [Temperatura do braço]
+Corrente média dos motores: [Corrente média]
+Vibração da base: [Média da vibração na base]
+Vibração do braço: [Média da vibração no braço]
+Dias ou Ciclos com limites de leitura ultrapassados:
+[Listar as datas ou ciclos em que os limites operacionais foram ultrapassados, em ordem crescente. Caso os dias ou ciclos em sequência sejam maiores que 4, agrupe-os.
+Exemplo:
+07/10/2024
+18/10/2024...20/10/2024
+Se o período de tempo for 'Diário', troque essa lista pela lista com as horas que um dado passou do limite. Por exemplo: 
+Corente - 08:00
+Temeperatura - 08:15
+Vibração da base - 08:30 
+]
 5. Procedimentos de Inspeção ou Manutenção
-Métodos Utilizados: Os dados de temperatura, corrente e vibração foram monitorados continuamente durante a operação da máquina.
-Ferramentas e Instrumentos:
+Métodos Utilizados: Os dados de temperatura, corrente e vibração foram monitorados continuamente em intervalos de tempo regulares durante a operação da máquina.
+Ferramentas e Instrumentos: 
     Câmera térmica para monitoramento da temperatura
     Sensores de vibração (3 pontos do braço)
     Sensor de corrente elétrica para medição da corrente dos motores
     Critérios de Avaliação: Os limites de operação para temperatura, corrente e vibração foram baseados no manual de instruções do braço robótico.
+Critérios de Avaliação: Os limites de operação para temperatura, corrente e vibração são delimitados segundoo manual de instruções do braço robótico.
 6. Diagnóstico e Condição da Máquina
-Desempenho Atual: [Fale do desempenho atual do braço robótico, considerando os dados apresentados e os dias que tiveram limites ultrapassado, e que, quanto mais próximo do limite uma leitura for, mais dados durante o dia, ou o mês, passaram aquela limite.]
-
-Análise de Vibrações, Ruídos, etc.: 
-
-Desgaste e Danos: Não foram observados sinais visíveis de desgaste ou danos nos componentes principais do braço robótico.
-
+Desempenho Atual: [Descreva o desempenho geral da máquina durante o período, com base nos dados coletados e nos dias/ciclos em que os limites foram ultrapassados.]
+Análise de Vibrações, Ruídos, etc.: [Descreva observações sobre possíveis vibrações, ruídos ou desvios durante a operação com base nos dados coletados e nos dias/ciclos em que os limites foram ultrapassados.]
+Desgaste e Danos: [Informe se foram observados desgastes ou danos nos componentes principais.]
 7. Recomendações
-Reparos Necessários: Não há reparos necessários no momento.
-Manutenção Preventiva: Sugere-se a verificação periódica dos motores e sensores de vibração para garantir que estejam funcionando corretamente. Também é recomendável revisar os ciclos de operação para evitar sobrecarga.
-Ações Corretivas: Nenhuma ação corretiva imediata é necessária, mas uma manutenção preventiva pode evitar futuros problemas operacionais.
-
+Reparos Necessários: [Descreva se há necessidade de reparos imediatos ou se a máquina está operando corretamente.]
+Manutenção Preventiva: [Recomendações de manutenção preventiva, como verificação de motores, sensores ou ajustes no ciclo de operação para evitar sobrecargas.]
+Ações Corretivas: [Informe se há necessidade de ações corretivas no momento ou se apenas a manutenção preventiva é suficiente.]
 8. Conclusão
-Resumo das Condições: [Dê um resumo das condições, considerando os dados apresentados e os dias que tiveram limites ultrapassado.]
-
-Prognóstico: O braço robótico deve continuar operando de forma eficiente, desde que os procedimentos de manutenção preventiva sejam seguidos e que o sistema seja monitorado regularmente para evitar sobrecargas. Os desvios observados não parecem comprometer o funcionamento imediato da máquina, mas devem ser observados com atenção.
+Resumo das Condições: [Faça um resumo das condições operacionais da máquina no período, considerando os dados coletados e os dias/ciclos com desvios.]
+Prognóstico: [Descreva a expectativa de desempenho da máquina, com base nas condições observadas, e se procedimentos de manutenção preventiva forem seguidos.]
 """

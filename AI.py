@@ -3,6 +3,7 @@ import google.generativeai as genai
 from AI_folder.AI_functions import consulta, previsao, meses
 from fpdf import FPDF
 import AI_folder.AI_specs as AI_specs
+import numpy as np
 # ----------------------------------------
 
 GEMINI_API_KEY = "AIzaSyBow1PWoN12TuqSw7wudJP2NdAS0OcRYMo"
@@ -38,54 +39,78 @@ def AI_predict() -> str:
 
     return texto_resposta
 
-def criar_pdf(texto, imagem_cabecalho=None, nome_arquivo='relatorio.pdf', imagem_anexo=None):
-    negrito = ['Relatório Técnico', '1. Identificação da Máquina', '2. Resumo Executivo', '3. Descrição Técnica da Máquina', '4. Histórico de Operação',
-               '5. Procedimentos de Inspeção ou Manutenção', '6. Diagnóstico e Condição da Máquina', '7. Recomendações', '8. Conclusão']
 
-    pdf = FPDF()
-    pdf.add_page()
+def AI_pdf(filtros, leituras):
+    temperatura = np.mean(leituras["temperatura"])
+    corrente = np.mean(leituras["corrente"])
+    vibracao_base = np.mean(leituras["vibracao_base"])
+    vibracao_braco = np.mean(leituras["vibracao_braco"])
+    data_registro = leituras["timestamp"]
 
-    # Adicionar imagem no topo centralizado
-    if imagem_cabecalho:
-        pdf.image(imagem_cabecalho, x=(pdf.w - 100) / 2, y=10, w=100)  # Ajuste a largura conforme necessário
-        pdf.ln(8)  # Espaço abaixo da imagem (menor)
-
-    # Configuração da fonte
-    pdf.set_font("Arial", size=12)
-
-    # Converter o texto para o encoding latin-1 
-    texto = texto.encode('latin-1', 'replace').decode('latin-1')
-
-    # Separar o texto em linhas e formatar negrito para os títulos
-    linhas = texto.split('\n')
-    for i, linha in enumerate(linhas):
-        if linha in negrito:
-            # Pular linha antes de cada título numerado, exceto o primeiro
-            if i != 0:  # Verifica se não é o primeiro tópico
-                pdf.ln(5)
-            
-            # Se for um título de ponto, colocar em negrito
-            partes = linha.split(':')
-            pdf.set_font("Arial", style='B', size=12)  # Negrito
-            pdf.multi_cell(0, 10, partes[0] + ':')  # Título em negrito
-            pdf.set_font("Arial", size=12)  # Texto normal
-            pdf.multi_cell(0, 10, ':'.join(partes[1:]))  # Texto normal abaixo
-            
-            # Se a linha for "9. Anexos", adicionar a imagem do anexo
-            if linha.startswith('Fotos e Imagens:') and imagem_anexo:
-                pdf.ln(5)  # Pequeno espaço antes de adicionar a imagem
-                pdf.image(imagem_anexo, x=(pdf.w - 100) / 2, w=100)  # Adiciona a imagem centralizada
-                pdf.ln(5)  # Espaço abaixo da imagem
-        else:
-            pdf.multi_cell(0, 10, linha)
-
-    # Gerar o arquivo PDF
-    pdf.output(nome_arquivo)
-
-
-def AI_pdf(user_input: str):
-    r_pdf = AI.send_message(f"{user_input}")
-    pdf_text = "\n" + r_pdf.text
+    limites_ultrapassados = ""
     
-    criar_pdf(texto=pdf_text, imagem_cabecalho="Logo.png", nome_arquivo="relatorio.pdf", imagem_anexo="AI/imagens/Foto.png")
-    
+    match filtros:
+        case "day":
+            filtros = "Diário"
+            comando_sql = f"""
+            SELECT strftime('%H:%M', timestamp) AS hora, 'temperatura' AS dado, temperatura AS valor
+            FROM leituras
+            WHERE temperatura > 45 
+            AND date(timestamp) = date({data_registro[0][:10]})
+            UNION ALL
+            SELECT strftime('%H:%M', timestamp) AS hora, 'corrente' AS dado, corrente AS valor
+            FROM leituras
+            WHERE corrente > 5
+            AND date(timestamp) = date({data_registro[0][:10]})
+            UNION ALL
+            SELECT strftime('%H:%M', timestamp) AS hora, 'vibracao_base' AS dado, vibracao_base AS valor
+            FROM leituras
+            WHERE vibracao_base > 5.5
+            AND date(timestamp) = date({data_registro[0][:10]})
+            UNION ALL
+            SELECT strftime('%H:%M', timestamp) AS hora, 'vibracao_braco' AS dado, vibracao_braco AS valor
+            FROM leituras
+            WHERE vibracao_braco > 5.5
+            AND date(timestamp) = date({data_registro[0][:10]});
+            """
+            limites_ultrapassados = consulta(sql_ = comando_sql)
+        case "week":    
+            filtros = "Semanal"
+            comando_sql = f"""
+            SELECT DISTINCT strftime('%w', timestamp) AS dia_semana
+            FROM leituras
+            WHERE (temperatura > 45 OR corrente > 5 OR vibracao_base > 5.5 OR vibracao_braco > 5.5)
+            AND date(timestamp) BETWEEN date({data_registro[0][:10]}) AND date({data_registro[-1][:10]});
+            """
+            limites_ultrapassados = consulta(sql_ = comando_sql)
+        case "month":
+            filtros = "Mensal"
+            comando_sql = f"""
+            SELECT DISTINCT strftime('%d', timestamp) AS dia
+            FROM leituras
+            WHERE (temperatura > 60 OR corrente > 10 OR vibracao_base > 5 OR vibracao_braco > 5)
+            AND strftime('%m', timestamp) = {data_registro[0][6:8]};    
+            """
+            limites_ultrapassados = consulta(sql_ = comando_sql)
+        case "year":
+            filtros = "Anual"
+            comando_sql = f"""
+            SELECT DISTINCT strftime('%m', timestamp) AS mes
+            FROM leituras
+            WHERE (temperatura > 60 OR corrente > 10 OR vibracao_base > 5 OR vibracao_braco > 5)
+            AND strftime('%Y', timestamp) = {data_registro[0][:5]};
+            """
+            limites_ultrapassados = consulta(comando_sql)
+            
+    input_IA = f"""Me crie um relátorio pdf com base nas seguintes informações, siga as instruções que estiverem entre '[]'.
+    período de tempo analisado: {filtros}
+    temperatura média: {temperatura}
+    corrente média: {corrente}
+    vibração média da base: {vibracao_base}
+    vibração média do braço: {vibracao_braco}    
+    quando os limites foram ultrapassado: {limites_ultrapassados}
+    primeira leitura: {data_registro[0]}
+    ultima_leitura: {data_registro[-1]}
+    """
+    print("AAAAA")
+    return AI_request(input_IA)

@@ -93,7 +93,6 @@ def obter_dias_da_semana(mes, numero_semana):
     # Retorna os dias como strings com 2 caracteres
     return f"{inicio_semana.day:02}", f"{fim_semana.day:02}"
 
-
 def get_sensor_data(time_range, day, month, week, year, mesSemana):
     conn = sqlite3.connect('instance/dados.db')
     cursor = conn.cursor()
@@ -310,7 +309,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
 
             return data
                 
-
+                
 @app.route('/dados_graficos', methods=['POST'])  # Alterado para aceitar apenas POST
 def dados_graficos():
     filters = request.json
@@ -376,10 +375,6 @@ def logout():
     flash('Logout realizado com sucesso.', 'success')
     return redirect(url_for('login'))
 
-@app.route("/braco")
-def braco():
-    return render_template("braco.html")
-
 @app.route("/chat")
 def index():
     return render_template("chat.html")
@@ -406,6 +401,6 @@ def pdf():
     leituras = dados.get('data')
     
     return AI_pdf(filtros, leituras)
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5001, debug=True)
- 
+    app.run(debug=True)

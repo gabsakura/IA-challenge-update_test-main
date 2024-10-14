@@ -122,7 +122,8 @@ No dia [Data], a primeira leitura foi às [hora:minutos], e a última às [hora:
 * vibracao da base: X
 * vibracao do braço: X
 
-- Limites ultrapassados[Caso nenhum dia tenha ultrapassado os limites, não mostre isso]:
+- Limites ultrapassados[Caso nenhum dia tenha ultrapassado os limites, não mostre isso.]:
+[Caso muitos dados de um mesmo tipo tenham ultrapassado os limites, coloque da seguinte forma: 'Muitas leituras de "Dado da leitura" ultrapassaram o limite de "limite da leitura"']
     * [Dado ultrapasado] - [Hora:minuto]
 
 

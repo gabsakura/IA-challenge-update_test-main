@@ -40,16 +40,16 @@ def consulta(sql_: str='', pre_comando: str = '', dia_: str='', mes_: str='', an
         if r'\n' in sql:
             sql = sql.replace(r'\n', '')
 
-    print(sql)
-    print("----------------------")
+    #print(sql)
+    #print("----------------------")
     conexao = sqlite3.connect('instance/dados.db')
     c = conexao.cursor()
     c.execute(sql)
     resposta = c.fetchall()
     conexao.close()
-    print("Requisição feita \n----------------------")
+    #print("Requisição feita \n----------------------")
     
-    print(resposta)
+    #print(resposta)
     return resposta
 
 class Motor:
