@@ -376,7 +376,9 @@ def logout():
     flash('Logout realizado com sucesso.', 'success')
     return redirect(url_for('login'))
 
-
+@app.route("/braco")
+def braco():
+    return render_template("braco.html")
 
 @app.route("/chat")
 def index():

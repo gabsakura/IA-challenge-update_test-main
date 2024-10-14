@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@400;700&display=swap"
+    rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles/header.css') }}">
   <title>Header</title>
 </head>
+
 <body>
   <header class="header">
     <nav class="nav-links">
       <a href="{{ url_for('home') }}" class="nav-link">Home</a>
-      <a href="{{ url_for('login') }}" class="nav-link">Login</a> 
+      <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+      <a href="{{ url_for('braco') }}" class="nav-link">Braço</a>
     </nav>
   </header>
   <script src="scripts/header.js"></script>
 </body>
+
 </html>

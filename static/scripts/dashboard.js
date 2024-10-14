@@ -36,7 +36,7 @@ function initCharts() {
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: { beginAtZero: true }
+                y: 2,
             }
         }
     });
@@ -56,7 +56,7 @@ function initCharts() {
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: { beginAtZero: true }
+                y: 2,
             }
         }
     });
@@ -76,7 +76,7 @@ function initCharts() {
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: { beginAtZero: true }
+                y: 2,
             }
         }
     });
@@ -96,7 +96,7 @@ function initCharts() {
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: { beginAtZero: true }
+                y: 20,
             }
         }
     });
@@ -159,7 +159,7 @@ function updateChartsMonthly(data) {
             const semanaVibracaoBase = data.vibracao_base.slice(inicio, fim);
             const semanaCorrente = data.corrente.slice(inicio, fim);
             const semanaTemperatura = data.temperatura.slice(inicio, fim);
-            
+
             // Verificar se há dados suficientes para a semana
             if (semanaVibracaoBraco.length > 0) {
                 // Calcula as médias semanais
