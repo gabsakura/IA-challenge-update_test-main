@@ -4,22 +4,35 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 75vw; /* Aumentar largura da caixa para 75% da tela */
+  width: 75vw;
   height: auto;
   margin: 0 auto;
   margin-top: 70px;
-  border: 5px solid #333; /* Adiciona borda ao redor da imagem */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  background-color: #000; /* Fundo preto */
+  border: 5px solid transparent; /* Borda transparente para começar */
+  box-shadow: 0 0 20px rgba(128, 0, 128, 0.7); /* Efeito neon roxo inicial */
+  transition: all 0.3s ease-in-out; /* Transição suave para o efeito */
+}
+
+.img-container:hover {
+  box-shadow: 0 0 30px rgba(138, 43, 226, 0.9), 
+              0 0 60px rgba(138, 43, 226, 0.6); /* Efeito neon roxo mais intenso ao passar o mouse */
+  border-color: rgba(138, 43, 226, 0.8); /* Borda neon roxa ao passar o mouse */
 }
 
 .img-container img {
   width: 100%; /* Tornar a imagem responsiva */
   height: auto;
-  border-collapse: collapse;
+  border-radius: 10px; /* Cantos levemente arredondados */
+  transition: opacity 0.3s ease-in-out;
 }
 
 .img-container img.blur {
-  filter: blur(5px);
+  filter: blur(5px); /* Efeito de blur para a imagem */
+}
+
+.img-container img:hover {
+  opacity: 0.9; /* Pequena redução na opacidade ao passar o mouse */
 }
 
 /* Borda entre as partes da imagem */
@@ -35,7 +48,7 @@ area {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.8); /* Fundo preto translúcido */
   justify-content: center;
   align-items: center;
   z-index: 9999;
@@ -51,19 +64,7 @@ area {
   text-align: center;
 }
 
-.close {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-#zoomed-img {
-  width: 100%;
-  border-radius: 8px;
-}
-
+/* Estilo para o texto descritivo */
 .description {
   margin-top: 20px;
   font-size: 16px;
@@ -73,6 +74,37 @@ area {
 
 /* Estilos adicionais */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Poppins', sans-serif;
   background-color: #f0f0f0;
+}
+
+/* Efeito de navegação nas setas */
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  padding: 16px;
+  margin-top: -22px;
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.prev {
+  left: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+.next {
+  right: 0;
+  border-radius: 0 3px 3px 0;
+}
+
+/* Esconde as setas por padrão */
+#prev-btn, #next-btn {
+  display: none;
 }

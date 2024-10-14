@@ -1,56 +1,64 @@
 // Dados para cada parte: imagem e texto
 const partData = {
     1: {
-        img: 'images/part1.jpeg', // Substitua pelo caminho correto da imagem
-        text: 'Parte 1: Esta é a base do braço robótico, onde todos os componentes se conectam.'
+        img: ['static/images/braco/Camera-thermica.jpg'],
+        text: 'Esse é o componente AMG8833 uma camera termica no qual é responsavel em captar os dados referentes a temperatura.'
     },
     2: {
-        img: 'images/part2.jpeg',
-        text: 'Parte 2: Esta seção contém os atuadores responsáveis pelo movimento.'
+        img: ['static/images/braco/Stepdown-grande.jpg', 'static/images/braco/Sensor_corrente.jpg'],
+        text: 'Este é o componente XY6020L junto ao ACS712, responsáveis por setar e monitorar a voltagem e corrente do braço robótico.'
     },
     3: {
-        img: 'images/part3.jpeg',
-        text: 'Parte 3: Aqui vemos os motores que permitem a rotação precisa do braço.'
+        img: ['static/images/braco/Servo-grande.webp'],
+        text: 'Este é um servo MG945 no qual está dentro do eixo, servindo como movimentação crucial do braço robótico.'
     },
     4: {
-        img: 'images/part4.jpeg',
-        text: 'Parte 4: Estrutura intermediária, oferecendo suporte para o braço.'
+        img: ['static/images/braco/MPU6050.jpg'],
+        text: 'Usamos o sensor MPU6050 para o cálculo de vibração no projeto, utilizando a mudança entre os eixos.'
     },
     5: {
-        img: 'images/part5.jpeg',
-        text: 'Parte 5: Sistema de controle de torque e força.'
+        img: ['static/images/braco/Mega.webp', 'static/images/braco/CNC_shield.jpg', 'static/images/braco/Driver_A4988.jpg','static/images/braco/Fonte.jpg','static/images/braco/stepdown_pequeno.webp' ],
+        text: 'Essa é a caixa que guarda todos os componentes do projeto, como Arduino Mega, CNC Shield V3, Driver A4988(roxo), Fonte chaveada S-250, Stepdown: LM2596.'
     },
     6: {
-        img: 'images/part6.jpeg',
-        text: 'Parte 6: Conexões para os sensores de feedback.'
+        img: ['static/images/braco/Motor_passo.jpg'],
+        text: 'Utilizamos o motor Nema 17 para movimentar a base e os eixos do projeto.'
     },
     7: {
-        img: 'images/part7.jpeg',
-        text: 'Parte 7: A base da garra que é usada para manipulação de objetos.'
+        img: ['static/images/braco/minimotor.webp'],
+        text: 'Esta é a garra utilizada para pegar e colocar objetos, manipulada por um mini motor DC N20.'
     },
-    8: {
-        img: 'images/part8.jpeg',
-        text: 'Parte 8: Conectores hidráulicos que geram força de preensão.'
-    },
-    9: {
-        img: 'images/part9.jpeg',
-        text: 'Parte 9: A garra em si, utilizada para interagir com o ambiente.'
-    }
 };
+let currentIndex = 0; // Índice da imagem atual
+let currentPart = null; // Parte atual sendo visualizada
 
-// Função para abrir o modal e exibir a parte ampliada
 function showPart(part) {
     const modal = document.getElementById('modal');
     const zoomedImg = document.getElementById('zoomed-img');
     const zoomedText = document.getElementById('zoomed-text');
     const imgContainer = document.querySelector('.img-container img');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    // Armazena a parte atual
+    currentPart = part;
+    currentIndex = 0; // Reinicia o índice da imagem
 
     // Adiciona o blur na imagem principal
     imgContainer.classList.add('blur');
 
-    // Define o caminho da imagem e o texto baseado na parte selecionada
-    zoomedImg.src = partData[part].img;
+    // Define o texto e a primeira imagem a ser exibida
+    zoomedImg.src = partData[part].img[currentIndex];
     zoomedText.textContent = partData[part].text;
+
+    // Verifica se há mais de uma imagem e exibe as setas se necessário
+    if (partData[part].img.length > 1) {
+        prevBtn.style.display = 'block';
+        nextBtn.style.display = 'block';
+    } else {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+    }
 
     // Exibe o modal
     modal.style.display = 'flex';
@@ -66,4 +74,16 @@ function closeModal() {
 
     // Esconde o modal
     modal.style.display = 'none';
+}
+
+// Função para navegar entre as imagens
+function changeImage(n) {
+    const zoomedImg = document.getElementById('zoomed-img');
+    const images = partData[currentPart].img; // Obtém as imagens da parte atual
+
+    // Atualiza o índice da imagem, garantindo que fique dentro dos limites
+    currentIndex = (currentIndex + n + images.length) % images.length;
+
+    // Atualiza a imagem no modal
+    zoomedImg.src = images[currentIndex];
 }
