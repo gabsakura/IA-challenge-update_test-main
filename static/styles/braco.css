@@ -9,15 +9,19 @@
   margin: 0 auto;
   margin-top: 70px;
   background-color: #000; /* Fundo preto */
-  border: 5px solid transparent; /* Borda transparente para começar */
-  box-shadow: 0 0 20px rgba(128, 0, 128, 0.7); /* Efeito neon roxo inicial */
-  transition: all 0.3s ease-in-out; /* Transição suave para o efeito */
+  border: 5px solid transparent;
+  box-shadow: 0 0 30px rgba(138, 43, 226, 0.9), 
+              0 0 60px rgba(138, 43, 226, 0.8), 
+              0 0 100px rgba(138, 43, 226, 0.6); /* Neon mais intenso */
+  transition: all 0.3s ease-in-out;
 }
 
 .img-container:hover {
-  box-shadow: 0 0 30px rgba(138, 43, 226, 0.9), 
-              0 0 60px rgba(138, 43, 226, 0.6); /* Efeito neon roxo mais intenso ao passar o mouse */
-  border-color: rgba(138, 43, 226, 0.8); /* Borda neon roxa ao passar o mouse */
+  box-shadow: 0 0 50px rgba(138, 43, 226, 1), 
+              0 0 100px rgba(138, 43, 226, 0.9), 
+              0 0 150px rgba(138, 43, 226, 0.8), 
+              0 0 200px rgba(138, 43, 226, 0.7); /* Neon roxo mais forte ao passar o mouse */
+  border-color: rgba(138, 43, 226, 1); /* Borda neon roxa brilhante */
 }
 
 .img-container img {
