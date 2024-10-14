@@ -108,9 +108,6 @@ def AI_pdf(filtros, leituras):
     corrente média: {corrente}
     vibração média da base: {vibracao_base}
     vibração média do braço: {vibracao_braco}    
-    quando os limites foram ultrapassado: {limites_ultrapassados}
-    primeira leitura: {data_registro[0]}
-    ultima_leitura: {data_registro[-1]}
+    quando os limites foram ultrapassado: {limites_ultrapassados}[Exiba como se eles tivessem sido solicitados pelo usuário]        
     """
-    print("AAAAA")
     return AI_request(input_IA)

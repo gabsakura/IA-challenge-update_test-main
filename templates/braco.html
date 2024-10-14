@@ -18,15 +18,13 @@
       <img src="{{ url_for('static', filename='images/braço.jpeg') }}" alt="braço" usemap="#image-map">
       <map name="image-map">
         <!-- Dividindo a imagem em 9 partes (3x3) -->
-        <area shape="rect" coords="0,0,400,267" alt="Parte 1" onclick="showPart(1)">
-        <area shape="rect" coords="400,0,800,267" alt="Parte 2" onclick="showPart(2)">
-        <area shape="rect" coords="264,204,1056,264" alt="Parte 3" onclick="showPart(3)">
-        <area shape="rect" coords="0,267,400,534" alt="Parte 4" onclick="showPart(4)">
-        <area shape="rect" coords="400,267,800,534" alt="Parte 5" onclick="showPart(5)">
-        <area shape="rect" coords="800,267,1200,534" alt="Parte 6" onclick="showPart(6)">
-        <area shape="rect" coords="0,534,400,800" alt="Parte 7" onclick="showPart(7)">
-        <area shape="rect" coords="400,534,800,800" alt="Parte 8" onclick="showPart(8)">
-        <area shape="rect" coords="800,534,1200,800" alt="Parte 9" onclick="showPart(9)">
+        <area shape="rect" coords="140,94,62,1032" alt="Parte 1" onclick="showPart(1)" id='camerathermica'>
+        <area shape="rect" coords="376,208,258,1320" alt="Parte 2" onclick="showPart(2)" id='stepdown'>
+        <area shape="rect" coords="172,192,798,100" alt="Parte 3" onclick="showPart(3)" id='Servo'>
+        <area shape="rect" coords="174,184,584,378" alt="Parte 4" onclick="showPart(4)" id=MPU>
+        <area shape="rect" coords="645,231,621,1353" alt="Parte 5" onclick="showPart(5)" id=caixa>
+        <area shape="rect" coords="212,158,570,794" alt="Parte 6" onclick="showPart(6)" id='motor'>
+        <area shape="rect" coords="303,291,1020,318" alt="Parte 7" onclick="showPart(7)" id='garra'>
       </map>
     </div>
     <!-- Modal para exibir a parte ampliada -->

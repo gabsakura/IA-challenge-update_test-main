@@ -80,7 +80,8 @@ Substitua qualquer motor danificado ou sobreaquecido antes de retomar as operaç
 """
 
 formato_pdf = f"""
-[Não exiba essa linha. Caso o usuário peça esse relatório em outro idioma, traduza o relatório para esse idioma]
+[Modifique apenas o que estiver entre '[]']
+[As informações que você está colocando nesse documento são médias dos dados. Quanto mais próximo o dado for do limite, mais dados ultrapassaram aquele limite]
 Relatório Técnico
 Data do Relatório: [Dia de hoje, no formato dia/mês/ano]
 Empresa/Organização: FIAP em parceria com a Reply
