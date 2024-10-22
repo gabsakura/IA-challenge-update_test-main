@@ -1,113 +1,172 @@
-// Função para buscar os dados via AJAX
 async function fetchData(filters) {
+    console.log('fetchData chamado com os filtros:', filters);
     const response = await fetch('/dados_graficos', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(filters)
     });
+
+    if (!response.ok) {
+        console.error('Erro ao buscar dados do servidor:', response.statusText);
+        return null;
+    }
+
     const data = await response.json();
+    console.log('Dados recebidos do servidor:', data); // Verificação se os dados estão chegando
     return data;
 }
-
 // Variáveis globais para os gráficos
 let vibrationBracoChart, vibrationBaseChart, currentChart, temperatureChart;
 
-// Função para inicializar os gráficos vazios
+// Função para inicializar os gráficos
 function initCharts() {
     const ctxVibrationBraco = document.getElementById('vibrationBracoChart').getContext('2d');
     const ctxVibrationBase = document.getElementById('vibrationBaseChart').getContext('2d');
     const ctxCurrent = document.getElementById('currentChart').getContext('2d');
     const ctxTemperature = document.getElementById('temperatureChart').getContext('2d');
 
+    // Definindo os thresholds
+    const temperatureThreshold = 40;
+    const vibrationThreshold = 5;
+    const currentThreshold = 5.5;
+
+    // Função para adicionar a linha de threshold
+    // Função para adicionar uma área de threshold vermelha
+function addThresholdArea(chart, threshold) {
+    chart.options.plugins.annotation = {
+        annotations: {
+            thresholdBox: {
+                type: 'box',
+                yMin: threshold, // O threshold no eixo Y
+                yMax: chart.scales['y'].max, // Preenche até o topo do gráfico
+                backgroundColor: 'rgba(255, 0, 0, 0.2)', // Cor vermelha transparente
+                borderColor: 'rgba(255, 0, 0, 0)', // Sem borda
+                borderWidth: 0,
+                xMin: chart.scales['x'].min, // Preenche toda a área no eixo X
+                xMax: chart.scales['x'].max,
+                label: {
+                    content: `Threshold: ${threshold}`,
+                    enabled: true,
+                    position: 'start',
+                    backgroundColor: 'rgba(255, 0, 0, 0.5)'
+                }
+            }
+        }
+    };
+}
+
+
+    // Configuração do gráfico de vibração do braço
     vibrationBracoChart = new Chart(ctxVibrationBraco, {
         type: 'line',
         data: {
-            labels: [],
+            labels: [], // Horas e dias
             datasets: [{
                 label: 'Vibração do Braço',
-                data: [],
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                borderWidth: 1
+                data: [], // Dados de vibração
+                backgroundColor: 'rgba(103, 58, 183, 0.2)',
+                borderColor: 'rgba(103, 58, 183, 1)',
+                borderWidth: 2
             }]
         },
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: 2,
+                y: 1
+            },
+            plugins: {
+                annotation: {} // Certifique-se de que o plugin de anotações está habilitado
             }
         }
     });
+    addThresholdArea(vibrationBracoChart, vibrationThreshold);
 
+    // Configuração do gráfico de vibração da base
     vibrationBaseChart = new Chart(ctxVibrationBase, {
         type: 'line',
         data: {
-            labels: [],
+            labels: [], // Horas e dias
             datasets: [{
                 label: 'Vibração da Base',
-                data: [],
-                borderColor: 'rgba(153, 102, 255, 1)',
-                backgroundColor: 'rgba(153, 102, 255, 0.5)',
-                borderWidth: 1
+                data: [], // Dados de vibração
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 2
             }]
         },
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: 2,
+                y: 1
+            },
+            plugins: {
+                annotation: {}
             }
         }
     });
+    addThresholdArea(vibrationBaseChart, vibrationThreshold);
 
+    // Configuração do gráfico de corrente
     currentChart = new Chart(ctxCurrent, {
         type: 'line',
         data: {
-            labels: [],
+            labels: [], // Horas e dias
             datasets: [{
                 label: 'Corrente',
-                data: [],
-                borderColor: 'rgba(255, 159, 64, 1)',
-                backgroundColor: 'rgba(255, 159, 64, 0.5)',
-                borderWidth: 1
+                data: [], // Dados de corrente
+                backgroundColor: 'rgba(58, 134, 255, 0.2)',
+                borderColor: 'rgba(58, 134, 255, 1)',
+                borderWidth: 2
             }]
         },
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: 2,
+                y: 2
+            },
+            plugins: {
+                annotation: {}
             }
         }
     });
+    addThresholdArea(currentChart, currentThreshold);
 
+    // Configuração do gráfico de temperatura
     temperatureChart = new Chart(ctxTemperature, {
         type: 'line',
         data: {
-            labels: [],
+            labels: [], // Horas e dias
             datasets: [{
                 label: 'Temperatura',
-                data: [],
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                borderWidth: 1
+                data: [], // Dados de temperatura
+                backgroundColor: 'rgba(186, 104, 200, 0.2)',
+                borderColor: 'rgba(186, 104, 200, 1)',
+                borderWidth: 2
             }]
         },
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: 20,
+                y: 25
+            },
+            plugins: {
+                annotation: {}
             }
         }
     });
+    addThresholdArea(temperatureChart, temperatureThreshold);
 }
 
 // Função genérica para atualizar os gráficos
-function updateChart(chart, labels, data) {
+function updateChart(chart, labels, data, threshold) {
     chart.data.labels = labels;
     chart.data.datasets[0].data = data || [];
+
+    // Atualiza o gráfico com os novos dados e atualiza a área de threshold
     chart.update();
 }
+
+
 
 // Função para formatar timestamps
 function formatTimestamps(timestamps, type) {
@@ -222,11 +281,8 @@ async function applyFilters() {
     }
 }
 
+// Função assíncrona para aplicar filtros e atualizar as caixas de média
 
-
-//FAZER PDF ESSA PARTE::::::::
-
-// Função assíncrona para gerar um relatório em PDF com os dados de sensores
 async function generatePDFReport(filters, data) {
     // Carregar a biblioteca jsPDF
     const { jsPDF } = window.jspdf;
@@ -469,7 +525,6 @@ async function applyFilters() {
     }
 
     // Gerar o PDF com os dados filtrados
-    generatePDFReport(filters, data);
 }
 
 // Inicializar os gráficos ao carregar a página

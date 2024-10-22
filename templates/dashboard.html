@@ -11,14 +11,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/dashboard.css') }}" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 </head>
 
 <body>
     {% include 'components/posHeader.html' %}
     <div class="container">
-        <h2 class="text-center mb-5">Dashboard</h2>
-
         <!-- Dropdown para seleção do intervalo de tempo -->
         <div class="filter-container">
             <label for="timeRange">Escolha o intervalo de tempo:</label>
@@ -95,7 +92,20 @@
                 <option value="2024">2024</option>
             </select>
         </div>
-
+        <div class="media-boxes">
+            <div class="media-box" id="vibrationBracoMediaBox">
+                Média Vibração Braço: <span id="vibrationBracoMedia"></span>
+            </div>
+            <div class="media-box" id="vibrationBaseMediaBox">
+                Média Vibração Base: <span id="vibrationBaseMedia"></span>
+            </div>
+            <div class="media-box" id="currentMediaBox">
+                Média Corrente: <span id="currentMedia"></span>
+            </div>
+            <div class="media-box" id="temperatureMediaBox">
+                Média Temperatura: <span id="temperatureMedia"></span>
+            </div>
+        </div>
         <div class="chart-grid">
             <div class="chart-item">
                 <h4>Vibração Braço</h4>
@@ -115,9 +125,9 @@
             </div>
         </div>
         <button id="generatePDF" onclick="generatePDF()">Gerar PDF</button>
-
     </div>
     <script src="{{ url_for('static', filename='scripts/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/texto.js') }}"></script>
     <script>
         function updateFilters() {
             const selectedOption = document.getElementById('timeRange').value;
