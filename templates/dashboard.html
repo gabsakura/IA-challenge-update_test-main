@@ -126,9 +126,20 @@
         </div>
         <button id="generatePDF" onclick="generatePDF()">Gerar PDF</button>
     </div>
+    <div id="main-dashboard">
+        <div id="outlierSection" class="outliers-summary">
+            <h3>Resumo de Outliers</h3>
+            <ul id="outliersList">
+                <!-- Lista de Outliers será adicionada aqui -->
+            </ul>
+        </div>
+    </div>
+    
+    
     <script src="{{ url_for('static', filename='scripts/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/texto.js') }}"></script>
     <script>
+        
         function updateFilters() {
             const selectedOption = document.getElementById('timeRange').value;
             // Ocultar todos os filtros

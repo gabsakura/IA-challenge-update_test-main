@@ -75,7 +75,16 @@ function addThresholdArea(chart, threshold) {
                 y: 1
             },
             plugins: {
-                annotation: {} // Certifique-se de que o plugin de anotações está habilitado
+                zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'xy',
+                    },
+                    zoom: {
+                        enabled: true,
+                        mode: 'xy',
+                    }
+                }
             }
         }
     });
@@ -256,6 +265,18 @@ function updateChartsMonthly(data) {
 }
 
 
+function resetZoom() {
+    vibrationBracoChart.resetZoom();
+    vibrationBaseChart.resetZoom();
+    currentChart.resetZoom();
+    temperatureChart.resetZoom();
+}
+
+// Inicializar os gráficos ao carregar a página
+window.onload = () => {
+    initCharts();
+    applyFilters();
+};
 
 
 // Adicionar o evento de clique ao botão "Aplicar Filtro"

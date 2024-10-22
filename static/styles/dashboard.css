@@ -209,3 +209,100 @@ body {
 .media-box:hover:before {
     box-shadow: 0 0 10px #9400D3; /* Escurecer o efeito de hover */
 }
+/* Para o contêiner principal */
+#main-dashboard {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 20px;
+    height: 100vh; /* Ocupa a altura total da tela */
+}
+
+/* Estilo para as seções de outliers e instruções com altura fixa */
+.outliers-summary, #instructionText {
+    padding: 20px;
+    border-radius: 10px;
+    width: 45%;
+    color: #f8f9fa;
+    border: 2px solid transparent;
+    position: relative;
+    animation: borderGlow 1.5s infinite alternate;
+    height: 400px; /* Altura fixa para limitar o crescimento */
+    overflow-y: auto; /* Adiciona barra de rolagem caso o conteúdo exceda a altura */
+}
+
+.outliers-summary h3 {
+    font-size: 1.8em; /* Tamanho maior */
+    margin-bottom: 15px;
+    color: #e9ecef; /* Cor do título */
+}
+
+#outliersList {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 10px; /* Reduz a margem inferior entre a lista e a próxima seção */
+}
+
+#outliersList li {
+    background-color: #3b3c4a; /* Fundo escuro */
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 1.2em; /* Tamanho maior para melhorar a leitura */
+    transition: background-color 0.3s ease;
+    color: #f8f9fa;
+}
+
+#outliersList li:hover {
+    background-color: #4e4f63;
+}
+
+/* Estilo para a seção de instruções */
+#instructionText {
+    padding: 20px;
+    width: 45%; /* Seção ocupando 45% */
+    color: #f8f9fa;
+    position: relative;
+    animation: borderGlow 1.5s infinite alternate; /* Animação de brilho */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Sombra leve */
+}
+
+/* Estilo das instruções com borda RGB brilhante */
+#instructionText p {
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 1.3em; /* Tamanho maior para as instruções */
+    color: #f8f9fa;
+    border: 2px solid transparent; /* Borda padrão */
+}
+
+/* Animação de brilho RGB */
+@keyframes borderGlow {
+    0% {
+        border-color: rgb(255, 0, 0); /* Vermelho */
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+    }
+    50% {
+        border-color: rgb(0, 255, 0); /* Verde */
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+    }
+    100% {
+        border-color: rgb(0, 0, 255); /* Azul */
+        box-shadow: 0 0 10px rgba(0, 0, 255, 0.7);
+    }
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+    #main-dashboard {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .outliers-summary, #instructionText {
+        width: 90%;
+    }
+}
