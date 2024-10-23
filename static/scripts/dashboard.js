@@ -15,6 +15,7 @@ async function fetchData(filters) {
     console.log('Dados recebidos do servidor:', data); // Verificação se os dados estão chegando
     return data;
 }
+
 // Variáveis globais para os gráficos
 let vibrationBracoChart, vibrationBaseChart, currentChart, temperatureChart;
 
@@ -25,36 +26,45 @@ function initCharts() {
     const ctxCurrent = document.getElementById('currentChart').getContext('2d');
     const ctxTemperature = document.getElementById('temperatureChart').getContext('2d');
 
-    // Definindo os thresholds
-    const temperatureThreshold = 40;
-    const vibrationThreshold = 5;
-    const currentThreshold = 5.5;
+    // Definindo os thresholds e mínimos dos eixos
+    const temperatureThreshold = 45;
+    const vibrationThreshold = 5.5;
+    const currentThreshold = 5;
 
-    // Função para adicionar a linha de threshold
-    // Função para adicionar uma área de threshold vermelha
-function addThresholdArea(chart, threshold) {
-    chart.options.plugins.annotation = {
-        annotations: {
-            thresholdBox: {
-                type: 'box',
-                yMin: threshold, // O threshold no eixo Y
-                yMax: chart.scales['y'].max, // Preenche até o topo do gráfico
-                backgroundColor: 'rgba(255, 0, 0, 0.2)', // Cor vermelha transparente
-                borderColor: 'rgba(255, 0, 0, 0)', // Sem borda
-                borderWidth: 0,
-                xMin: chart.scales['x'].min, // Preenche toda a área no eixo X
-                xMax: chart.scales['x'].max,
-                label: {
-                    content: `Threshold: ${threshold}`,
-                    enabled: true,
-                    position: 'start',
-                    backgroundColor: 'rgba(255, 0, 0, 0.5)'
+    const vibrationBracoMin = 1; // Defina o mínimo desejado
+    const vibrationBaseMin = 1; // Defina o mínimo desejado
+    const currentMin = 2; // Defina o mínimo desejado
+    const temperatureMin = 25; // Defina o mínimo desejado
+
+    // Função para adicionar a linha de threshold e a área de threshold vermelha
+    function addThresholdArea(chart, threshold) {
+        chart.options.plugins.annotation = {
+            annotations: {
+                thresholdLine: {
+                    type: 'line',
+                    yMin: threshold,
+                    yMax: threshold,
+                    borderColor: '#e85959',
+                    borderWidth: 2,
+                    label: {
+                        enabled: true,
+                        position: 'end',
+                        content: `Limite: ${threshold}`
+                    }
+                },
+                thresholdBox: {
+                    type: 'box',
+                    yMin: threshold,
+                    yMax: chart.scales['y'].max,
+                    backgroundColor: 'rgba(255, 0, 0, 0.2)', // Cor vermelha transparente
+                    borderColor: 'rgba(255, 0, 0, 0)', // Sem borda
+                    borderWidth: 0,
+                    xMin: chart.scales['x'].min,
+                    xMax: chart.scales['x'].max,
                 }
             }
-        }
-    };
-}
-
+        };
+    }
 
     // Configuração do gráfico de vibração do braço
     vibrationBracoChart = new Chart(ctxVibrationBraco, {
@@ -72,19 +82,12 @@ function addThresholdArea(chart, threshold) {
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: 1
+                y: {
+                    min: vibrationBracoMin // Definindo o valor mínimo do eixo Y
+                }
             },
             plugins: {
-                zoom: {
-                    pan: {
-                        enabled: true,
-                        mode: 'xy',
-                    },
-                    zoom: {
-                        enabled: true,
-                        mode: 'xy',
-                    }
-                }
+                annotation: {} // Aqui para o plugin de anotações
             }
         }
     });
@@ -106,10 +109,12 @@ function addThresholdArea(chart, threshold) {
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: 1
+                y: {
+                    min: vibrationBaseMin // Definindo o valor mínimo do eixo Y
+                }
             },
             plugins: {
-                annotation: {}
+                annotation: {} // Aqui para o plugin de anotações
             }
         }
     });
@@ -131,10 +136,12 @@ function addThresholdArea(chart, threshold) {
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: 2
+                y: {
+                    min: currentMin // Definindo o valor mínimo do eixo Y
+                }
             },
             plugins: {
-                annotation: {}
+                annotation: {} // Aqui para o plugin de anotações
             }
         }
     });
@@ -156,10 +163,12 @@ function addThresholdArea(chart, threshold) {
         options: {
             scales: {
                 x: { beginAtZero: true },
-                y: 25
+                y: {
+                    min: temperatureMin // Definindo o valor mínimo do eixo Y
+                }
             },
             plugins: {
-                annotation: {}
+                annotation: {} // Aqui para o plugin de anotações
             }
         }
     });
@@ -171,11 +180,9 @@ function updateChart(chart, labels, data, threshold) {
     chart.data.labels = labels;
     chart.data.datasets[0].data = data || [];
 
-    // Atualiza o gráfico com os novos dados e atualiza a área de threshold
+    // Atualiza o gráfico com os novos dados e mantém o valor mínimo do eixo Y
     chart.update();
 }
-
-
 
 // Função para formatar timestamps
 function formatTimestamps(timestamps, type) {
@@ -243,27 +250,18 @@ function updateChartsMonthly(data) {
                     corrente: mediaCorrente,
                     temperatura: mediaTemperatura
                 });
-            } else {
-                console.warn(`Dados insuficientes para a semana ${i + 1}`);
             }
         }
 
-        // Atualiza os gráficos com os dados das semanas
-        const formattedTimestamps = semanas.map(semana => semana.timestamp);
-        const vibracaoBracoData = semanas.map(semana => semana.vibracao_braco);
-        const vibracaoBaseData = semanas.map(semana => semana.vibracao_base);
-        const correnteData = semanas.map(semana => semana.corrente);
-        const temperaturaData = semanas.map(semana => semana.temperatura);
-
-        updateChart(vibrationBracoChart, formattedTimestamps, vibracaoBracoData);
-        updateChart(vibrationBaseChart, formattedTimestamps, vibracaoBaseData);
-        updateChart(currentChart, formattedTimestamps, correnteData);
-        updateChart(temperatureChart, formattedTimestamps, temperaturaData);
+        // Atualiza os gráficos com os dados mensais agregados
+        updateChart(vibrationBracoChart, semanas.map(s => s.timestamp), semanas.map(s => s.vibracao_braco));
+        updateChart(vibrationBaseChart, semanas.map(s => s.timestamp), semanas.map(s => s.vibracao_base));
+        updateChart(currentChart, semanas.map(s => s.timestamp), semanas.map(s => s.corrente));
+        updateChart(temperatureChart, semanas.map(s => s.timestamp), semanas.map(s => s.temperatura));
     } else {
         console.error("Os dados fornecidos não são válidos:", data);
     }
 }
-
 
 function resetZoom() {
     vibrationBracoChart.resetZoom();
