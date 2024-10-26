@@ -160,20 +160,30 @@ function toggleDetails(elementId) {
         document.getElementById('toggleOutliersButton').innerText = 'Mostrar Outliers (Clique para Exibir)';
     }
 }
-
 function updateOutliersUI(outliers) {
     const outliersContainer = document.getElementById('outliersList');
-    const instructionContainer = document.createElement('div');
-    instructionContainer.id = 'instructionText';
-    instructionContainer.style.marginLeft = '20px';
-    document.getElementById('main-dashboard').appendChild(instructionContainer);
+    let instructionContainer = document.getElementById('instructionText');
+    
     if (!outliersContainer) {
         console.error("Elemento para exibição de outliers não encontrado.");
         return;
     }
+
+    // Limpa o conteúdo dos contêineres
     outliersContainer.innerHTML = '';
+
+    // Cria o contêiner de instruções uma única vez
+    if (!instructionContainer) {
+        instructionContainer = document.createElement('div');
+        instructionContainer.id = 'instructionText';
+        instructionContainer.style.marginLeft = '20px';
+        document.getElementById('main-dashboard').appendChild(instructionContainer);
+    }
     instructionContainer.innerHTML = '';
+
     console.log("Atualizando UI de outliers com os seguintes dados:", outliers);
+
+    // Itera sobre os outliers e adiciona as informações ao contêiner
     for (const [metric, values] of Object.entries(outliers)) {
         if (values.length > 0) {
             const section = document.createElement('div');
@@ -187,6 +197,8 @@ function updateOutliersUI(outliers) {
             });
             section.appendChild(list);
             outliersContainer.appendChild(section);
+
+            // Adiciona o texto de instrução específico para cada métrica
             let instructionText;
             if (metric === "vibracaoBraco") {
                 instructionText = "Instruções para Vibração do Braço: Realize a manutenção regularmente e verifique o balanceamento.";
@@ -203,5 +215,6 @@ function updateOutliersUI(outliers) {
         }
     }
 }
+
 
 window.onload =applyFilters;
