@@ -169,10 +169,10 @@ function updateOutliersUI(outliers) {
         return;
     }
 
-    // Limpa o conteúdo dos contêineres
+    // Limpa o conteúdo dos contêineres para exibir novos resultados
     outliersContainer.innerHTML = '';
 
-    // Cria o contêiner de instruções uma única vez
+    // Cria o contêiner de instruções apenas se ele não existir
     if (!instructionContainer) {
         instructionContainer = document.createElement('div');
         instructionContainer.id = 'instructionText';
@@ -181,25 +181,27 @@ function updateOutliersUI(outliers) {
     }
     instructionContainer.innerHTML = '';
 
-    console.log("Atualizando UI de outliers com os seguintes dados:", outliers);
+    // Verifica se há dados de outliers para serem exibidos
+    let hasOutliers = false;
 
-    // Itera sobre os outliers e adiciona as informações ao contêiner
     for (const [metric, values] of Object.entries(outliers)) {
-        if (values.length > 0) {
+        if (values && values.length > 0) {
+            hasOutliers = true;
             const section = document.createElement('div');
             section.innerHTML = `<h4>Outliers de ${metric}:</h4>`;
             const list = document.createElement('ul');
+            
             values.forEach(item => {
-                console.log(`Processando outlier: Índice ${item.index + 1}, Valor ${item.valor}, Timestamp ${item.timestamp}`);
                 const listItem = document.createElement('li');
                 listItem.textContent = `Entrada ${item.index + 1}: ${item.valor} - Encontrado em: ${item.timestamp}`;
                 list.appendChild(listItem);
             });
+            
             section.appendChild(list);
             outliersContainer.appendChild(section);
 
-            // Adiciona o texto de instrução específico para cada métrica
-            let instructionText;
+            // Adiciona instruções baseadas na métrica do outlier
+            let instructionText = "";
             if (metric === "vibracaoBraco") {
                 instructionText = "Instruções para Vibração do Braço: Realize a manutenção regularmente e verifique o balanceamento.";
             } else if (metric === "vibracaoBase") {
@@ -209,10 +211,16 @@ function updateOutliersUI(outliers) {
             } else if (metric === "temperatura") {
                 instructionText = "Instruções para Temperatura: Assegure uma boa ventilação e monitoramento da carga térmica.";
             }
+            
             const instructionParagraph = document.createElement('p');
             instructionParagraph.textContent = instructionText;
             instructionContainer.appendChild(instructionParagraph);
         }
+    }
+
+    // Exibe uma mensagem se não houver outliers após o filtro
+    if (!hasOutliers) {
+        outliersContainer.innerHTML = '<p>Nenhum outlier encontrado com os critérios atuais.</p>';
     }
 }
 
