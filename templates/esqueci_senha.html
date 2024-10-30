@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Esqueci Minha Senha</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    async function enviarSolicitacao(event) {
+      event.preventDefault(); // Impede o envio padrão do formulário
+
+      const username = document.getElementById('username').value;
+
+      try {
+        const response = await fetch('/esqueci_senha', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams({ username: username })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          window.location.href = data.redirect; // Redireciona para a página de redefinição
+        } else {
+          const errorMessage = await response.text();
+          alert('Erro: ' + errorMessage);
+        }
+      } catch (error) {
+        console.error('Erro ao enviar solicitação:', error);
+        alert('Ocorreu um erro. Tente novamente mais tarde.');
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Esqueci Minha Senha</h2>
+    <form onsubmit="enviarSolicitacao(event)">
+      <label for="username">Digite seu nome de usuário:</label>
+      <input type="text" id="username" name="username" required>
+      <button type="submit">Enviar Solicitação</button>
+    </form>
+    <p>Você será redirecionado para a página de redefinição de senha, se o nome de usuário existir.</p>
+  </div>
+</body>
+</html>

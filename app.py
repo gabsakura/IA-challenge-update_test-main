@@ -5,7 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 import sqlite3
 from datetime import datetime, timedelta
+from itsdangerous import URLSafeTimedSerializer
+import bcrypt
 
+serializer = URLSafeTimedSerializer('sua_chave_secreta')
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'sua_chave_secreta'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dados.db'
@@ -359,6 +362,39 @@ def login():
         else:
             flash('Login ou senha incorretos. Tente novamente.', 'error')
     return render_template('login.html')
+
+
+# Rota para solicitar redefinição de senha
+
+@app.route('/esqueci_senha', methods=['GET', 'POST'])
+def esqueci_senha():
+    if request.method == 'POST':
+        username = request.form['username']
+        user = User.query.filter_by(username=username).first()
+        if user:
+            token = serializer.dumps(username, salt='senha_reset')
+            return jsonify({"redirect": url_for('reset_senha', token=token, _external=True)})
+        else:
+            return jsonify({"error": "Nome de usuário não encontrado"}), 404
+    return render_template('esqueci_senha.html')
+@app.route('/reset_senha/<token>', methods=['GET', 'POST'])
+def reset_senha(token):
+    try:
+        username = serializer.loads(token, salt='senha_reset', max_age=3600)
+    except:
+        flash('O token de redefinição de senha expirou.', 'error')
+        return redirect(url_for('esqueci_senha'))
+
+    user = User.query.filter_by(username=username).first()
+    if request.method == 'POST' and user:
+        nova_senha = request.form['nova_senha']
+        hashed_password = generate_password_hash(nova_senha)  # Removido o método sha256
+        user.password = hashed_password
+        db.session.commit()
+        flash('Senha atualizada com sucesso!', 'success')
+        return redirect(url_for('login'))  # Certifique-se de ter uma rota de login
+
+    return render_template('reset_senha.html', token=token)
 
 
 # Rota protegida (dashboard)
