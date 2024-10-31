@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Administração</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #FFFFFF;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            color: #9a67ea; /* Cor do título */
+        }
+
+        #userList {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px auto;
+            max-width: 800px; /* Limite de largura */
+            padding: 20px;
+        }
+
+        .user-card {
+            background-color: #1E1E1E;
+            border: 2px solid #333333;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            width: 200px; /* Largura fixa */
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .user-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px #9400D3; /* Efeito de brilho */
+        }
+
+        #logoutButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff; /* Azul */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #logoutButton:hover {
+            background-color: #0056b3; /* Azul escuro ao passar o mouse */
+        }
+
+        .admin-indicator {
+            font-weight: bold;
+            color: #28a745; /* Verde para admin */
+        }
+
+        .non-admin-indicator {
+            color: #dc3545; /* Vermelho para não-admin */
+        }
+
+        /* Estilos para o botão "Adicionar como Admin" */
+        .addAdminButton {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745; /* Verde */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .addAdminButton:hover {
+            background-color: #218838; /* Verde escuro ao passar o mouse */
+        }
+
+        #addAdminMessage {
+            text-align: center;
+            margin-top: 10px;
+            color: #FFD700; /* Amarelo para mensagens */
+        }
+    </style>
+</head>
+<body>
+    <h1>Painel de Administração</h1>
+    <div id="userList"></div>
+    <div id="addAdminMessage"></div>
+    
+    <button id="logoutButton">Sair</button>
+
+    <script>
+        const token = localStorage.getItem('access_token');
+
+        async function fetchUsers(filters = {}) {
+            console.log('fetchUsers chamada com filtros:', filters);
+
+            try {
+                const response = await fetch('/admin/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(filters)
+                });
+
+                console.log("Requisição enviada para /admin/users");
+
+                if (!response.ok) {
+                    console.error('Erro ao buscar dados do servidor:', response.statusText);
+                    return null;
+                }
+
+                const data = await response.json();
+                console.log('Dados recebidos do servidor:', data);
+                displayUsers(data.users);
+            } catch (error) {
+                console.error('Erro:', error.message);
+            }
+        }
+
+        function displayUsers(users) {
+            console.log("Display Users chamado com:", users);
+
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+
+            if (users.length === 0) {
+                userList.innerText = "Nenhum usuário encontrado.";
+            } else {
+                users.forEach(user => {
+                    const userDiv = document.createElement('div');
+                    userDiv.classList.add('user-card');
+                    userDiv.innerHTML = `
+                        <div>Usuário: ${user.username}</div>
+                        <div class="${user.is_admin ? 'admin-indicator' : 'non-admin-indicator'}">
+                            Admin: ${user.is_admin ? 'Sim' : 'Não'}
+                        </div>
+                        ${!user.is_admin ? `<button class="addAdminButton" onclick="addAdmin(${user.id})">Adicionar como Admin</button>` : ''}
+                    `;
+                    userList.appendChild(userDiv);
+                });
+            }
+        }
+
+        document.getElementById('logoutButton').onclick = () => {
+            localStorage.removeItem('access_token');
+            window.location.href = '/login';
+        };
+
+        async function addAdmin(userId) {
+            try {
+                const response = await fetch(`/admin/users/${userId}/make-admin`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    document.getElementById('addAdminMessage').innerText = "Usuário promovido a Admin com sucesso!";
+                    fetchUsers(); // Atualiza a lista de usuários
+                } else {
+                    const errorMessage = await response.text();
+                    document.getElementById('addAdminMessage').innerText = `Erro: ${errorMessage}`;
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar admin:', error.message);
+                document.getElementById('addAdminMessage').innerText = `Erro ao adicionar admin: ${error.message}`;
+            }
+        }
+
+        fetchUsers();  // Chama a função sem filtros inicialmente
+    </script>
+</body>
+</html>

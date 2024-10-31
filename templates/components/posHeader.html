@@ -12,7 +12,12 @@
     <nav class="nav-links">
       <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
       <a href="{{ url_for('index') }}" class="nav-link">Chat</a>
+      {% if session.get('username') and session.get('is_admin') %}  <!-- Verificação se o usuário é admin -->
+      <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Admin Dashboard</a>  <!-- Link do painel de admin -->
+      {% endif %}
       <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>  
+      
+      
     </nav>
   </header>
 </body>

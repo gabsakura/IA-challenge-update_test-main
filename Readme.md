@@ -16,7 +16,7 @@ Este projeto é uma aplicação web desenvolvida com Flask, que permite monitora
 - **Flask-Migrate**: Para gerenciamento de migrações do banco de dados.
 - **SQLite**: Banco de dados utilizado para armazenamento de dados.
 - **Werkzeug**: Para segurança na manipulação de senhas.
-- **Jinja2**: Motor de templates para renderização de HTML.
+- **HTML/CSS**: Para reenderizar e deixar as paginas web bonitas.
 
 ## Instalação
 
@@ -25,3 +25,15 @@ Este projeto é uma aplicação web desenvolvida com Flask, que permite monitora
    ```bash
    git clone https://github.com/gabsakura/IA-challenge-update_test-main.git
    cd IA-challenge-update_test-main
+2. Instale as dependências:
+
+  ```bash
+
+    pip install -r requirements.txt
+
+3. Execute a aplicação
+    ```bash
+    
+    python app.py
+A aplicação estará disponível em http://127.0.0.1:5001.
+

@@ -3,10 +3,11 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import sqlite3
 from datetime import datetime, timedelta
 from itsdangerous import URLSafeTimedSerializer
-import bcrypt
+
 
 serializer = URLSafeTimedSerializer('sua_chave_secreta')
 app = Flask(__name__)
@@ -14,16 +15,18 @@ app.config['SECRET_KEY'] = 'sua_chave_secreta'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dados.db'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
+login_manager = LoginManager()
+login_manager.init_app(app)
 # Modelos
 class Dados(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     info = db.Column(db.String(150))
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
+    username = db.Column(db.String(150), nullable=False, unique=True)
+    password = db.Column(db.String(150), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False) 
 
 # Rota para a página inicial (Home)
 @app.route("/")
@@ -348,20 +351,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
-# Login de usuário
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['user']
-        password = request.form['password']
-        user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
-            session['username'] = user.username
-            flash('Login realizado com sucesso!', 'success')
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Login ou senha incorretos. Tente novamente.', 'error')
-    return render_template('login.html')
+
 
 
 # Rota para solicitar redefinição de senha
@@ -377,6 +367,7 @@ def esqueci_senha():
         else:
             return jsonify({"error": "Nome de usuário não encontrado"}), 404
     return render_template('esqueci_senha.html')
+    
 @app.route('/reset_senha/<token>', methods=['GET', 'POST'])
 def reset_senha(token):
     try:
@@ -397,14 +388,67 @@ def reset_senha(token):
     return render_template('reset_senha.html', token=token)
 
 
-# Rota protegida (dashboard)
-@app.route('/dashboard', methods=['GET', 'POST'])
-def dashboard():
-    if 'username' not in session:  # Verificando se 'username' está na sessão
-        flash('Você precisa estar logado para acessar essa página.', 'error')
-        return redirect(url_for('login'))
-    return render_template('dashboard.html', username=session['username'])
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('user')  # Use .get() para evitar KeyError
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(username=username).first()
+        
+        if user and check_password_hash(user.password, password):
+            session['username'] = user.username
+            session['is_admin'] = user.is_admin  # Armazena o status de admin na sessão
+            flash('Login realizado com sucesso!', 'success')
+            return redirect(url_for('dashboard'))  # Redireciona para o painel do usuário
+        else:
+            flash('Login ou senha incorretos. Tente novamente.', 'error')
+    
+    return render_template('login.html')
 
+@app.route('/dashboard')
+def dashboard():
+    if 'username' not in session:
+        flash('Você precisa estar logado para acessar o dashboard.', 'error')
+        return redirect(url_for('login'))  # Redireciona para a página de login se não estiver logado
+    
+    return render_template('dashboard.html')  # Renderiza o template do dashboard
+
+@app.route('/admin_dashboard')
+def admin_dashboard():
+    if not session.get('is_admin'):  # Verifica se o usuário é admin
+        flash('Acesso negado. Você não tem permissão para acessar esta página.')
+        return redirect(url_for('dashboard'))  # Redireciona para o dashboard normal
+    return render_template('admin_dashboard.html')
+
+
+# Criação da rota para buscar usuários com filtros
+# Endpoint para obter usuários
+@app.route('/admin/users', methods=['POST'])
+def get_users():
+    users = User.query.all()
+    return jsonify(users=[{'id': user.id, 'username': user.username, 'is_admin': user.is_admin} for user in users])
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+@app.route('/admin/users/<int:user_id>/make-admin', methods=['PATCH'])
+def make_admin(user_id):
+    user = User.query.get(user_id)
+    if user:
+        user.is_admin = True  # Promove o usuário a administrador
+        db.session.commit()
+        return jsonify(message='Usuário promovido a admin com sucesso!'), 200
+    else:
+        return jsonify(message='Usuário não encontrado!'), 404
+
+# Inicializando o banco de dados
+def create_tables():
+    with app.app_context():  # Cria um contexto de aplicativo
+        db.create_all()
+
+# Chame a função de criação de tabelas apenas uma vez
+create_tables()
 
 @app.route('/logout')
 def logout():
@@ -412,10 +456,13 @@ def logout():
     flash('Logout realizado com sucesso.', 'success')
     return redirect(url_for('login'))
 
+
 @app.route("/braco")
 def braco():
     return render_template("braco.html")
-
+@app.route("/login")
+def asd():
+    return render_template("login.html")
 @app.route("/chat")
 def index():
     return render_template("chat.html")
