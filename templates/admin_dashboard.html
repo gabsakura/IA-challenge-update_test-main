@@ -156,7 +156,7 @@
 
         document.getElementById('logoutButton').onclick = () => {
             localStorage.removeItem('access_token');
-            window.location.href = '/login';
+            window.location.href = '/dashboard';
         };
 
         async function addAdmin(userId) {

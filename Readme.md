@@ -35,5 +35,12 @@ Este projeto é uma aplicação web desenvolvida com Flask, que permite monitora
     ```bash
     
     python app.py
+
 A aplicação estará disponível em http://127.0.0.1:5001.
 
+## Screenshots do Projeto
+
+Aqui estão algumas capturas de tela do projeto:
+
+| ![Descrição da Imagem 1](caminho/para/screenshot1.png) | ![Descrição da Imagem 2](caminho/para/screenshot2.png) | ![Descrição da Imagem 3](caminho/para/screenshot3.png) |
+|:--:|:--:|:--:|

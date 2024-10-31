@@ -32,9 +32,8 @@ class User(db.Model, UserMixin):
 @app.route("/")
 def home():
     return render_template("home.html")
-
 def mes_para_numero(mes, a=False):
-    
+
     if a: 
         meses = {
         "janeiro": '01',
@@ -66,7 +65,7 @@ def mes_para_numero(mes, a=False):
         "dezembro": 12
         }
     mes_lower = mes.lower()
-    
+
     return meses.get(mes_lower, "Mês inválido")
 
 def obter_dias_da_semana(mes, numero_semana):
@@ -79,7 +78,7 @@ def obter_dias_da_semana(mes, numero_semana):
 
     # Obtém o ano atual
     ano_atual = datetime.now().year
-    
+
     # Calcula o primeiro dia do mês
     primeiro_dia_do_mes = datetime(ano_atual, mes, 1)
 
@@ -95,7 +94,7 @@ def obter_dias_da_semana(mes, numero_semana):
     # Se o fim da semana ultrapassa o último dia do mês, ajusta
     if fim_semana > ultimo_dia_do_mes:
         fim_semana = ultimo_dia_do_mes
-        
+
     # Retorna os dias como strings com 2 caracteres
     return f"{inicio_semana.day:02}", f"{fim_semana.day:02}"
 
@@ -118,7 +117,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
             cursor.execute(comando_sql)
             rows = cursor.fetchall()
             conn.close()
-   
+
             dados_temperatura_str = rows[0][0]  # Ex: "24,25,24"
             dados_corrente_str = rows[0][1]     # Ex: "1,4,2"
             dados_vibracao_base_str = rows[0][2] # Ex: "1.1,2.1,3.5"
@@ -135,7 +134,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
             # Combinar todas as listas em uma única lista
             lista_unica = [dados_temperatura, dados_corrente, dados_vibracao_base, dados_vibracao_braco, horas]
 
-            
+
             print(lista_unica[4])
             # Estruturar os dados em um formato de dicionário
             data = {
@@ -147,7 +146,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
             }
 
             return data
-    
+
         case "week":
             mes = mes_para_numero(mesSemana, a=True)
             dias = obter_dias_da_semana(mes_para_numero(mesSemana), week)
@@ -170,7 +169,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
             cursor.execute(comando_sql)
             resultados = cursor.fetchall()  # Busca todos os resultados
             conn.close()
-            
+
             # Inicializa listas para armazenar os dados
             dias_list = []
             media_temperatura_list = []
@@ -204,7 +203,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
             }
 
             return data
-                    
+
         case "month":
             mes = mes_para_numero(month, a=True)
             comando_sql = f"""
@@ -260,7 +259,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
             }
 
             return data
-            
+
         case 'year': 
             comando_sql = f"""
                 SELECT 
@@ -280,7 +279,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
             cursor.execute(comando_sql)
             resultados = cursor.fetchall()  # Busca todos os resultados
             conn.close()
-            
+
             # Inicializa listas para armazenar os dados
             media_temperatura_list = []
             media_corrente_list = []
@@ -295,7 +294,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
                 media_corrente_list.append(linha[2])  # Média de Corrente
                 media_vibracao_base_list.append(linha[3])  # Média de Vibração Base
                 media_vibracao_braco_list.append(linha[4])  # Média de Vibração do Braço
-            
+
             # Junta todas as listas em uma única lista
             dados_combinados = [
                 media_temperatura_list,
@@ -304,7 +303,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
                 media_vibracao_braco_list,
                 meses_list
             ]
-            
+
             print(dados_combinados)
             data = {
                 'temperatura': dados_combinados[0],
@@ -315,23 +314,22 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
             }
 
             return data
-                
+
 
 @app.route('/dados_graficos', methods=['POST'])  # Alterado para aceitar apenas POST
 def dados_graficos():
     filters = request.json
-    
+
     time_range = filters.get('timeRange')
     day = filters.get('day')
     month = filters.get('month')
     week = filters.get('week')
     year = filters.get('year')
     mesSemana = filters.get('monthWeek')
-    
-    data = get_sensor_data(time_range, day, month, week, year, mesSemana)
-    
-    return jsonify(data)
 
+    data = get_sensor_data(time_range, day, month, week, year, mesSemana)
+
+    return jsonify(data)
 
 # Registro de usuário
 @app.route('/register', methods=['GET', 'POST'])

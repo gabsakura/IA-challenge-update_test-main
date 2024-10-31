@@ -17,6 +17,8 @@ async function fetchData(filters) {
 
     return data;
 }
+
+// Função para aplicar filtros e atualizar a UI
 async function applyFilters() {
     console.log('applyFilters chamado');
     const selectedTimeRange = document.getElementById('timeRange').value;
@@ -30,6 +32,7 @@ async function applyFilters() {
     };
     console.log('Filtros aplicados:', filters);
     const data = await fetchData(filters);
+    
     if (data && data.timestamp && data.timestamp.length > 0) {
         const vibracaoBraco = data.vibracao_braco;
         const vibracaoBase = data.vibracao_base;
@@ -37,26 +40,32 @@ async function applyFilters() {
         const temperatura = data.temperatura;
         const timestamps = data.timestamp;
         console.log('Dados separados:', vibracaoBraco, vibracaoBase, corrente, temperatura);
+        
         // Atualizar caixas de média
         updateMediaBoxes(vibracaoBraco, vibracaoBase, corrente, temperatura);
-        // Detectar outliers
+        
+        // Detectar outliers e atualizar a UI
         detectAndDisplayOutliers(vibracaoBraco, vibracaoBase, corrente, temperatura, timestamps);
     } else {
         console.error('Dados recebidos são inválidos:', data);
+        
         // Atualiza as caixinhas para indicar que não há dados
         document.getElementById('vibrationBracoMedia').innerText = 'N/A';
         document.getElementById('vibrationBaseMedia').innerText = 'N/A';
         document.getElementById('currentMedia').innerText = 'N/A';
         document.getElementById('temperatureMedia').innerText = 'N/A';
-    } }
-
+        
+        // Limpa a lista de outliers se não houver dados
+        updateOutliersUI({ vibracaoBraco: [], vibracaoBase: [], corrente: [], temperatura: [] });
+    }
+}
 
 // Função para calcular médias e atualizar caixas de média
 function updateMediaBoxes(vibracaoBraco, vibracaoBase, corrente, temperatura) {
-    const mediaVibracaoBraco = vibracaoBraco.reduce((a, b) => a + b, 0) / vibracaoBraco.length;
-    const mediaVibracaoBase = vibracaoBase.reduce((a, b) => a + b, 0) / vibracaoBase.length;
-    const mediaCorrente = corrente.reduce((a, b) => a + b, 0) / corrente.length;
-    const mediaTemperatura = temperatura.reduce((a, b) => a + b, 0) / temperatura.length;
+    const mediaVibracaoBraco = vibracaoBraco.reduce((a, b) => a + b, 0) / vibracaoBraco.length || 0;
+    const mediaVibracaoBase = vibracaoBase.reduce((a, b) => a + b, 0) / vibracaoBase.length || 0;
+    const mediaCorrente = corrente.reduce((a, b) => a + b, 0) / corrente.length || 0;
+    const mediaTemperatura = temperatura.reduce((a, b) => a + b, 0) / temperatura.length || 0;
 
     console.log('Médias calculadas:', {
         mediaVibracaoBraco,
@@ -99,7 +108,7 @@ document.getElementById('week').addEventListener('change', applyFilters);
 document.getElementById('year').addEventListener('change', applyFilters);
 document.getElementById('monthWeek').addEventListener('change', applyFilters);
 
-// Função para formatar timestamps
+// Função para detectar e exibir outliers
 function detectAndDisplayOutliers(vibracaoBraco, vibracaoBase, corrente, temperatura, timestamps) {
     const limits = {
         vibracaoBraco: { min: 1.0, max: 5.0 },
@@ -114,52 +123,25 @@ function detectAndDisplayOutliers(vibracaoBraco, vibracaoBase, corrente, tempera
         temperatura: [],
     };
     for (let i = 0; i < vibracaoBraco.length; i++) {
-        console.log(`Original timestamp[${i}]:`, timestamps[i]);
         const originalTimestamp = timestamps[i];
         if (vibracaoBraco[i] < limits.vibracaoBraco.min || vibracaoBraco[i] > limits.vibracaoBraco.max) {
-            outliers.vibracaoBraco.push({ 
-                index: i, 
-                valor: vibracaoBraco[i], 
-                timestamp: originalTimestamp 
-            });
+            outliers.vibracaoBraco.push({ index: i, valor: vibracaoBraco[i], timestamp: originalTimestamp });
         }
         if (vibracaoBase[i] < limits.vibracaoBase.min || vibracaoBase[i] > limits.vibracaoBase.max) {
-            outliers.vibracaoBase.push({ 
-                index: i, 
-                valor: vibracaoBase[i], 
-                timestamp: originalTimestamp 
-            });
+            outliers.vibracaoBase.push({ index: i, valor: vibracaoBase[i], timestamp: originalTimestamp });
         }
         if (corrente[i] < limits.corrente.min || corrente[i] > limits.corrente.max) {
-            outliers.corrente.push({ 
-                index: i, 
-                valor: corrente[i], 
-                timestamp: originalTimestamp 
-            });
+            outliers.corrente.push({ index: i, valor: corrente[i], timestamp: originalTimestamp });
         }
         if (temperatura[i] < limits.temperatura.min || temperatura[i] > limits.temperatura.max) {
-            outliers.temperatura.push({ 
-                index: i, 
-                valor: temperatura[i], 
-                timestamp: originalTimestamp 
-            });
+            outliers.temperatura.push({ index: i, valor: temperatura[i], timestamp: originalTimestamp });
         }
     }
     console.log('Outliers detectados:', outliers);
     updateOutliersUI(outliers);
 }
 
-
-function toggleDetails(elementId) {
-    const detailsElement = document.getElementById(elementId);
-    if (detailsElement.classList.contains('hidden')) {
-        detailsElement.classList.remove('hidden');
-        document.getElementById('toggleOutliersButton').innerText = 'Esconder Outliers (Clique para Ocultar)';
-    } else {
-        detailsElement.classList.add('hidden');
-        document.getElementById('toggleOutliersButton').innerText = 'Mostrar Outliers (Clique para Exibir)';
-    }
-}
+// Função para atualizar a UI com outliers
 function updateOutliersUI(outliers) {
     const outliersContainer = document.getElementById('outliersList');
     let instructionContainer = document.getElementById('instructionText');
@@ -205,24 +187,24 @@ function updateOutliersUI(outliers) {
             if (metric === "vibracaoBraco") {
                 instructionText = "Instruções para Vibração do Braço: Realize a manutenção regularmente e verifique o balanceamento.";
             } else if (metric === "vibracaoBase") {
-                instructionText = "Instruções para Vibração da Base: Aperte os parafusos e verifique o suporte.";
+                instructionText = "Instruções para Vibração da Base: Verifique a fixação e alinhamento dos motores.";
             } else if (metric === "corrente") {
-                instructionText = "Instruções para Corrente: Monitore a carga e verifique a integridade do motor.";
+                instructionText = "Instruções para Corrente: Inspecione os cabos e conexões.";
             } else if (metric === "temperatura") {
-                instructionText = "Instruções para Temperatura: Assegure uma boa ventilação e monitoramento da carga térmica.";
+                instructionText = "Instruções para Temperatura: Avalie o sistema de refrigeração.";
             }
-            
-            const instructionParagraph = document.createElement('p');
-            instructionParagraph.textContent = instructionText;
-            instructionContainer.appendChild(instructionParagraph);
+            instructionContainer.innerHTML += `<p>${instructionText}</p>`;
         }
     }
 
-    // Exibe uma mensagem se não houver outliers após o filtro
+    // Exibe mensagem caso não haja outliers
     if (!hasOutliers) {
-        outliersContainer.innerHTML = '<p>Nenhum outlier encontrado com os critérios atuais.</p>';
+        outliersContainer.innerHTML = '<p>Não foram encontrados outliers.</p>';
+        instructionContainer.innerHTML = '';
     }
 }
 
-
-window.onload =applyFilters;
+// Chama applyFilters ao carregar a página para exibir os dados iniciais
+document.addEventListener('DOMContentLoaded', () => {
+    applyFilters();
+});

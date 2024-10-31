@@ -28,7 +28,7 @@
                     <option value="month">Mês</option>
                     <option value="year">Ano</option>
                 </select>
-                <button id="applyFilter">Aplicar Filtro</button>
+                <button id="applyFilter" onclick="applyFilter()">Aplicar Filtro</button>
             </div>
         </div>
 
@@ -136,11 +136,9 @@
         </div>
     </div>
     
-    
     <script src="{{ url_for('static', filename='scripts/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/texto.js') }}"></script>
     <script>
-        
         function updateFilters() {
             const selectedOption = document.getElementById('timeRange').value;
             // Ocultar todos os filtros
@@ -159,6 +157,27 @@
             } else if (selectedOption === 'year') {
                 document.getElementById('yearFilter').style.display = 'flex';
             }
+        }
+
+        function applyFilter() {
+            const selectedOption = document.getElementById('timeRange').value;
+            let filterValue = '';
+
+            if (selectedOption === 'day') {
+                const date = new Date(document.getElementById('day').value);
+                filterValue = date.toISOString().split('T')[0];  // Captura a data no formato YYYY-MM-DD
+            } else if (selectedOption === 'week') {
+                const month = document.getElementById('monthWeek').value;
+                const week = document.getElementById('week').value;
+                filterValue = `${month} - Semana ${week}`;
+            } else if (selectedOption === 'month') {
+                filterValue = document.getElementById('month').value;
+            } else if (selectedOption === 'year') {
+                filterValue = document.getElementById('year').value;
+            }
+
+            console.log("Filtro aplicado:", filterValue);
+            // Aqui você pode adicionar a lógica para fazer a requisição ao backend com o filtro selecionado
         }
     </script>
 </body>
