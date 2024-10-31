@@ -2,10 +2,17 @@
 body {
     background-color: #1f1f1f; /* Cor de fundo escura */
     color: #e0e0e0; /* Cor do texto */
+    margin: 0; /* Remove margens padrão */
+    padding: 0; /* Remove padding padrão */
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+    height: 100vh; /* Ocupa toda a altura da tela */
 }
 
 h2 {
     color: #ffffff; /* Cor do título */
+    text-align: center; /* Centraliza o título */
 }
 
 .form-control {
@@ -13,6 +20,9 @@ h2 {
     border-radius: 5px; /* Bordas arredondadas */
     background-color: #2c2c2c; /* Fundo do campo de entrada */
     color: #e0e0e0; /* Cor do texto */
+    padding: 10px; /* Espaço interno */
+    width: 100%; /* Largura total */
+    margin-bottom: 15px; /* Espaçamento inferior */
 }
 
 .form-control:focus {
@@ -24,6 +34,10 @@ h2 {
     background-color: #007BFF; /* Cor do botão */
     border-color: #007BFF; /* Borda do botão */
     border-radius: 5px; /* Bordas arredondadas */
+    color: white; /* Cor do texto do botão */
+    padding: 10px; /* Espaçamento interno do botão */
+    width: 100%; /* Largura total do botão */
+    transition: background-color 0.3s; /* Transição suave para hover */
 }
 
 .btn-primary:hover {
@@ -41,10 +55,30 @@ h2 {
     border-radius: 10px; /* Bordas arredondadas da caixa */
     width: 100%; /* Largura da caixa de login */
     max-width: 500px; /* Tamanho máximo da caixa de login */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Sombra ao redor da caixa */
 }
 
 .toast {
     background-color: #333333; /* Fundo do toast */
     color: #e0e0e0; /* Cor do texto do toast */
     border: 1px solid #007BFF; /* Borda do toast */
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+    .form-box {
+        padding: 1rem; /* Reduz o padding em telas menores */
+    }
+
+    .form-control {
+        padding: 8px; /* Reduz o padding dos campos em telas menores */
+    }
+
+    h2 {
+        font-size: 1.5rem; /* Ajusta o tamanho do título */
+    }
+
+    .btn-primary {
+        padding: 8px; /* Reduz o padding do botão */
+    }
 }

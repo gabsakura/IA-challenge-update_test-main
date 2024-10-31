@@ -4,15 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Redefinir Senha</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/esqueci.css') }}">
 </head>
 <body>
+  {% include 'components/header.html' %}
   <div class="container">
     <h2>Redefinir Senha</h2>
     <form action="/reset_senha/{{ token }}" method="POST">
       <label for="nova_senha">Digite sua nova senha:</label>
       <input type="password" id="nova_senha" name="nova_senha" required>
-      <button type="submit">Redefinir Senha</button>
+      <button type="submit" class="btn-primary">Redefinir senha</button>
+
     </form>
   </div>
 </body>

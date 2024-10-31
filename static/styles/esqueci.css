@@ -1,0 +1,101 @@
+/* Importando a fonte do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+/* Estilos Gerais */
+body {
+    background-color: #1f1f1f; /* Cor de fundo escura */
+    color: #e0e0e0; /* Cor do texto */
+    margin: 0; /* Remove margens padrão */
+    padding: 0; /* Remove padding padrão */
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+    height: 100vh; /* Ocupa toda a altura da tela */
+    font-family: 'Roboto', sans-serif; /* Aplicando a nova fonte */
+}
+.form-box {
+    border: 1px solid #007BFF; /* Borda azul em volta da caixa */
+    padding: 4rem; /* Aumenta o espaço interno da caixa */
+    background-color: #333333; /* Fundo da caixa */
+    border-radius: 10px; /* Bordas arredondadas da caixa */
+    width: 100%; /* Largura da caixa de login */
+    max-width: 700px; /* Tamanho máximo da caixa de login (aumentado) */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); /* Sombra ao redor da caixa */
+    margin: 30px; /* Espaço ao redor da caixa */
+}
+
+h2 {
+    margin-bottom: 2rem; /* Aumenta o espaço abaixo do título */
+}
+
+.form-control {
+    border: 1px solid #007BFF; /* Borda azul */
+    border-radius: 5px; /* Bordas arredondadas */
+    background-color: #2c2c2c; /* Fundo do campo de entrada */
+    color: #e0e0e0; /* Cor do texto */
+    padding: 12px; /* Aumenta o espaço interno dos campos */
+    width: 100%; /* Largura total */
+    margin-bottom: 25px; /* Aumenta o espaçamento inferior */
+}
+
+.btn-primary {
+    background-color: #007BFF; /* Cor do botão */
+    border-color: #007BFF; /* Borda do botão */
+    border-radius: 25px; /* Botão redondo */
+    color: white; /* Cor do texto do botão */
+    padding: 12px; /* Aumenta o espaçamento interno do botão */
+    width: 100%; /* Largura total do botão */
+    transition: background-color 0.3s; /* Transição suave para hover */
+    margin-top: 15px; /* Espaço acima do botão */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* Cor do botão ao passar o mouse */
+}
+
+
+/* Estilos do Formulário */
+.container {
+    border: 1px solid #007BFF; /* Borda azul */
+    border-radius: 10px; /* Bordas arredondadas */
+    background-color: #333333; /* Fundo da caixa */
+    padding: 2rem; /* Espaço interno da caixa */
+    width: 100%; /* Largura total */
+    max-width: 400px; /* Tamanho máximo da caixa */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Sombra ao redor da caixa */
+}
+
+.form-control:focus {
+    border-color: #0056b3; /* Cor da borda ao focar */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Sombra ao focar */
+}
+
+
+/* Estilos do Texto */
+p {
+    text-align: center; /* Centraliza o texto */
+    color: #e0e0e0; /* Cor do texto */
+    border: 1px solid #007BFF; /* Borda azul em volta do texto */
+    border-radius: 5px; /* Bordas arredondadas */
+    padding: 10px; /* Espaço interno */
+}
+
+
+/* Responsividade */
+@media (max-width: 600px) {
+    .container {
+        padding: 1rem; /* Reduz o padding em telas menores */
+    }
+
+    .form-control {
+        padding: 8px; /* Reduz o padding dos campos em telas menores */
+    }
+
+    h2 {
+        font-size: 1.5rem; /* Ajusta o tamanho do título */
+    }
+
+    .btn-primary {
+        padding: 8px; /* Reduz o padding do botão */
+    }
+}

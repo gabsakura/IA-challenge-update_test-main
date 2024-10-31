@@ -1,184 +1,133 @@
 /* Estilos da sidebar */
 .sidebar {
-    width: 300px;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: -300px; /* Escondido inicialmente */
-    transition: left 0.3s ease;
-    background: linear-gradient(135deg, #141E30, #243B55); /* Fundo futurista */
-    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.5);
-    border-radius: 0 50px 50px 0; /* Bordas arredondadas */
-    color: white;
-    padding: 20px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column; /* Conteúdo em coluna */
-    align-items: center; /* Centralizar conteúdo */
+  width: 300px;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: -300px; /* Escondido inicialmente */
+  transition: left 0.3s ease;
+  background: linear-gradient(135deg, #141E30, #243B55); /* Fundo futurista */
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.5);
+  border-radius: 0 50px 50px 0; /* Bordas arredondadas */
+  color: white;
+  padding: 20px;
+  overflow: hidden; /* Evitar transbordo de conteúdo */
+  display: flex;
+  flex-direction: column; /* Conteúdo em coluna */
+  align-items: center; /* Centralizar conteúdo */
+}
+
+.sidebar.open {
+  left: 0; /* Sidebar visível */
+}
+
+.sidebar.closed {
+  left: -300px; /* Sidebar escondida */
+}
+
+/* Título da Sidebar */
+.sidebar-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Estilos da lista dentro da sidebar */
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+  width: 100%; /* Ocupa toda a largura disponível */
+}
+
+.sidebar-item {
+  padding: 10px;
+  margin: 10px 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  transition: background 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+  text-align: center; /* Centraliza texto */
+  opacity: 0; /* Inicialmente escondido para animação */
+  transform: translateX(-20px); /* Animação de entrada */
+}
+
+.sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.2); /* Efeito de hover */
+  transform: scale(1.05); /* Animação de hover com zoom */
+}
+
+.sidebar.open .sidebar-item {
+  opacity: 1; /* Torna visível ao abrir */
+  transform: translateX(0); /* Animação de entrada */
+}
+
+/* Botão de abrir/fechar sidebar */
+.toggle-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, #56CCF2, #2F80ED); /* Cor futurista */
+  border: none;
+  padding: 15px 20px;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+  border-radius: 50px; /* Arredondado */
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease, transform 0.2s ease;
+  z-index: 2; /* Sobrepor ao restante da sidebar */
+}
+
+.toggle-btn:hover {
+  background: linear-gradient(135deg, #2F80ED, #56CCF2); /* Alterar gradiente no hover */
+  transform: scale(1.1); /* Animação no hover */
+}
+
+/* Conteúdo da sidebar */
+.sidebar-content {
+  margin-top: 80px; /* Espaço abaixo do botão de fechar */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .sidebar {
+      width: 250px; /* Largura reduzida em telas menores */
   }
-  
-  .sidebar.open {
-    left: 0; /* Sidebar visível */
-  }
-  
-  .sidebar.closed {
-    left: -300px; /* Sidebar escondida */
-  }
-  
-  /* Botão de abrir/fechar sidebar */
+
   .toggle-btn {
-    position: absolute; /* Fixo dentro da sidebar */
-    top: 20px; /* Espaçamento do topo */
-    left: 20px; /* Posição do lado esquerdo */
-    background: linear-gradient(135deg, #56CCF2, #2F80ED); /* Cor futurista */
-    border: none;
-    padding: 15px 20px;
-    font-size: 20px;
-    color: white;
-    cursor: pointer;
-    border-radius: 50px; /* Arredondado */
-    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);a/* Estilos da sidebar */
-    .sidebar {
-      width: 300px;
-      height: 100%;
-      position: fixed;
-      top: 0;
-      left: -300px; /* Escondido inicialmente */
-      transition: left 0.3s ease;
-      background: linear-gradient(135deg, #141E30, #243B55); /* Fundo futurista */
-      box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.5);
-      border-radius: 0 50px 50px 0; /* Bordas arredondadas */
-      color: white;
-      padding: 20px;
-      overflow: hidden; /* Evitar transbordo de conteúdo */
-    }
-    
-    .sidebar.open {
-      left: 0; /* Mostrar quando aberto */
-    }
-    
-    .sidebar.closed {
-      left: -300px; /* Escondido quando fechado */
-    }
-    
-    /* Título da Sidebar */
-    .sidebar-title {
-      font-size: 24px;
-      margin-bottom: 20px;
-      text-align: center;
-      font-weight: bold;
-    }
-    
-    /* Estilos da lista dentro da sidebar */
-    .sidebar-list {
-      list-style: none;
-      padding: 0;
-    }
-    
-    .sidebar-item {
-      padding: 10px;
-      margin: 10px 0;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      transition: background 0.3s ease, transform 0.2s ease;
-      cursor: pointer;
-    }
-    
-    .sidebar-item:hover {
-      background: rgba(255, 255, 255, 0.2); /* Efeito de hover */
-      transform: scale(1.05); /* Animação de hover com zoom */
-    }
-    
-    /* Botão de abrir/fechar sidebar */
-    .toggle-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background: linear-gradient(135deg, #56CCF2, #2F80ED); /* Cor futurista */
-      border: none;
-      padding: 15px 20px;
-      font-size: 20px;
-      color: white;
-      cursor: pointer;
-      border-radius: 50px; /* Arredondado */
-      box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    
-    .toggle-btn:hover {
-      background: linear-gradient(135deg, #2F80ED, #56CCF2); /* Alterar gradiente no hover */
-      transform: scale(1.1); /* Animação no hover */
-    }
-    
-    /* Animação de transição */
-    .sidebar-item {
-      opacity: 0;
-      transform: translateX(-20px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-    }
-    
-    .sidebar.open .sidebar-item {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    
-    transition: background 0.3s ease, transform 0.2s ease;
-    z-index: 2; /* Sobrepor ao restante da sidebar */
+      padding: 10px 15px; /* Ajusta padding do botão */
+      font-size: 18px; /* Ajusta tamanho da fonte */
   }
-  
-  .toggle-btn:hover {
-    background: linear-gradient(135deg, #2F80ED, #56CCF2); /* Alterar gradiente no hover */
-    transform: scale(1.1); /* Animação no hover */
-  }
-  
-  /* Conteúdo da sidebar */
-  .sidebar-content {
-    margin-top: 80px; /* Espaço abaixo do botão de fechar */
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  /* Título da Sidebar */
+
   .sidebar-title {
-    font-size: 24px;
-    margin-bottom: 20px;
-    text-align: center;
-    font-weight: bold;
+      font-size: 20px; /* Tamanho da fonte reduzido */
   }
-  
-  /* Estilos da lista dentro da sidebar */
-  .sidebar-list {
-    list-style: none;
-    padding: 0;
-    width: 100%; /* Ocupa toda a largura disponível */
-  }
-  
+
   .sidebar-item {
-    padding: 10px;
-    margin: 10px 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    transition: background 0.3s ease, transform 0.2s ease;
-    cursor: pointer;
-    text-align: center; /* Centralizar texto */
+      padding: 8px; /* Reduz padding em telas menores */
   }
-  
-  .sidebar-item:hover {
-    background: rgba(255, 255, 255, 0.2); /* Efeito de hover */
-    transform: scale(1.05); /* Animação de hover com zoom */
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+      width: 200px; /* Largura ainda menor em telas muito pequenas */
   }
-  
-  /* Animação de transição */
+
+  .toggle-btn {
+      padding: 8px 12px; /* Ajusta padding do botão */
+      font-size: 16px; /* Ajusta tamanho da fonte */
+  }
+
+  .sidebar-title {
+      font-size: 18px; /* Tamanho da fonte reduzido */
+  }
+
   .sidebar-item {
-    opacity: 0;
-    transform: translateX(-20px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
+      padding: 6px; /* Reduz padding em telas pequenas */
   }
-  
-  .sidebar.open .sidebar-item {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  
+}

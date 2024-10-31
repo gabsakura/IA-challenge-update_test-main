@@ -9,6 +9,7 @@
   padding: 20px 0;
   display: flex;
   justify-content: flex-end; /* Alinha os itens à direita */
+  transition: background-color 0.3s ease; /* Transição suave ao mudar a cor de fundo */
 }
 
 /* Links de navegação */
@@ -34,4 +35,39 @@
 /* Ajustes na classe scrolled */
 .header.scrolled {
   background-color: rgba(0, 0, 0, 0.7); /* Fundo ao rolar */
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .header {
+    padding: 15px 0; /* Ajusta o padding para telas menores */
+  }
+
+  .nav-links {
+    margin-right: 10px; /* Reduz o espaço à direita */
+  }
+
+  .nav-link {
+    margin: 0 10px; /* Ajusta o espaçamento entre os links */
+    font-size: 0.9rem; /* Reduz o tamanho da fonte */
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    flex-direction: column; /* Muda para coluna em telas muito pequenas */
+    align-items: center; /* Centraliza os itens */
+    padding: 10px 0; /* Ajusta o padding */
+  }
+
+  .nav-links {
+    flex-direction: column; /* Muda para coluna */
+    align-items: center; /* Centraliza os links */
+    margin-right: 0; /* Remove a margem direita */
+  }
+
+  .nav-link {
+    margin: 5px 0; /* Ajusta o espaçamento entre os links */
+    font-size: 0.8rem; /* Reduz ainda mais o tamanho da fonte */
+  }
 }

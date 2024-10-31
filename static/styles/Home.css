@@ -69,7 +69,7 @@ header {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  height: 100vh;
+  height: auto; /* Muda para auto para melhor ajuste em telas menores */
 }
 
 .Imagem-habilidade {
@@ -216,11 +216,12 @@ a:hover {
   }
 
   .video-container iframe {
-    height: 250px;
+    height: 250px; /* Ajusta a altura do vídeo em telas pequenas */
   }
 
   .caixas {
-    flex-direction: column;
+    flex-direction: column; /* Muda para coluna em telas pequenas */
+    height: auto; /* Ajusta a altura */
   }
 
   .Imagem-habilidade img {
@@ -231,7 +232,17 @@ a:hover {
   .Imagem-habilidade {
     margin: 10px 0;
   }
+
+  .video-section {
+    padding: 30px 0; /* Ajusta o padding */
+  }
+
+  .logo-section {
+    height: auto; /* Ajusta a altura */
+    padding: 20px 0; /* Adiciona padding */
+  }
 }
+
 .show {
   opacity: 1;
   transform: translateY(0);

@@ -80,6 +80,7 @@ function initCharts() {
             }]
         },
         options: {
+            responsive: true, // Ativa a responsividade
             scales: {
                 x: { beginAtZero: true },
                 y: {
@@ -107,6 +108,7 @@ function initCharts() {
             }]
         },
         options: {
+            responsive: true, // Ativa a responsividade
             scales: {
                 x: { beginAtZero: true },
                 y: {
@@ -134,6 +136,7 @@ function initCharts() {
             }]
         },
         options: {
+            responsive: true, // Ativa a responsividade
             scales: {
                 x: { beginAtZero: true },
                 y: {
@@ -161,6 +164,7 @@ function initCharts() {
             }]
         },
         options: {
+            responsive: true, // Ativa a responsividade
             scales: {
                 x: { beginAtZero: true },
                 y: {

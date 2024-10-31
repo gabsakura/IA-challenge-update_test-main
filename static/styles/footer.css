@@ -1,20 +1,42 @@
 /* Estilo simples e minimalista para o footer */
 .footer {
-    background-color: rgba(18, 18, 18, 0.9); /* Fundo ao rolar, mais escuro */
-    color: #cccccc; /* Texto em cinza claro para contrastar com o fundo */
-    padding: 10px;
-    text-align: center;
-    font-size: 0.9rem;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 100;
+  background-color: rgba(18, 18, 18, 0.9); /* Fundo ao rolar, mais escuro */
+  color: #cccccc; /* Texto em cinza claro para contrastar com o fundo */
+  padding: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+  position: fixed;
+  bottom: 0;
+  left: 0; /* Alinhamento à esquerda */
+  right: 0; /* Alinhamento à direita */
+  width: 100%;
+  z-index: 100;
+}
+
+.footer p {
+  margin: 0; /* Remove margens extras */
+  font-family: Arial, sans-serif; /* Fonte padrão e discreta */
+  font-size: 0.9rem;
+}
+
+/* Responsividade */
+@media (max-width: 576px) {
+  .footer {
+      padding: 15px; /* Aumenta o padding em telas menores */
+      font-size: 0.8rem; /* Reduz o tamanho da fonte */
   }
-  
-  
-  .footer p {
-    margin: 0; /* Remove margens extras */
-    font-family: Arial, sans-serif; /* Fonte padrão e discreta */
-    font-size: 0.9rem;
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .footer {
+      padding: 12px; /* Ajusta o padding para telas médias */
+      font-size: 0.85rem; /* Ajusta o tamanho da fonte */
   }
-  
+}
+
+@media (min-width: 769px) {
+  .footer {
+      padding: 10px; /* Mantém o padding para telas maiores */
+      font-size: 0.9rem; /* Mantém o tamanho da fonte */
+  }
+}

@@ -1,28 +1,92 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #121212;
+    color: #FFFFFF;
+    margin: 0;
+    padding: 0;
 }
 
 h1 {
     text-align: center;
+    margin: 20px 0;
+    color: #9a67ea; /* Cor do título */
 }
 
 #userList {
-    max-width: 600px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     margin: 20px auto;
-    padding: 10px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px; /* Limite de largura */
+    padding: 20px;
 }
 
-button {
+.user-card {
+    background-color: #1E1E1E;
+    border: 2px solid #333333;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px;
+    width: 100%; /* Largura 100% em telas pequenas */
+    max-width: 200px; /* Largura máxima */
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.user-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px #9400D3; /* Efeito de brilho */
+}
+
+#logoutButton {
     display: block;
     margin: 20px auto;
     padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
     border: none;
     border-radius: 5px;
+    background-color: #007bff; /* Azul */
+    color: white;
     cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#logoutButton:hover {
+    background-color: #0056b3; /* Azul escuro ao passar o mouse */
+}
+
+.admin-indicator {
+    font-weight: bold;
+    color: #28a745; /* Verde para admin */
+}
+
+.non-admin-indicator {
+    color: #dc3545; /* Vermelho para não-admin */
+}
+
+.addAdminButton {
+    margin-top: 10px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #28a745; /* Verde */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.addAdminButton:hover {
+    background-color: #218838; /* Verde escuro ao passar o mouse */
+}
+
+#addAdminMessage {
+    text-align: center;
+    margin-top: 10px;
+    color: #FFD700; /* Amarelo para mensagens */
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 768px) {
+    .user-card {
+        max-width: 90%; /* Largura maior em telas pequenas */
+    }
 }

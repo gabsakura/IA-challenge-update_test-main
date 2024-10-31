@@ -1,3 +1,10 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #000; /* Fundo preto para contraste */
+  color: #e0e0e0; /* Cor do texto para um bom contraste com o fundo */
+  margin: 0; /* Remove margens padrão */
+}
+
 /* Centralizar a imagem e definir bordas entre partes */
 .img-container {
   position: relative;
@@ -5,9 +12,9 @@
   justify-content: center;
   align-items: center;
   width: 75vw;
+  max-width: 900px; /* Limite máximo para telas grandes */
   height: auto;
-  margin: 0 auto;
-  margin-top: 70px;
+  margin: 70px auto; /* Margem centralizada */
   background-color: #000; /* Fundo preto */
   border: 5px solid transparent;
   box-shadow: 0 0 30px rgba(138, 43, 226, 0.9), 
@@ -62,7 +69,7 @@ area {
   background-color: #fff;
   padding: 20px;
   border-radius: 10px;
-  width: 60%;
+  width: 90%; /* Responsividade */
   max-width: 600px;
   position: relative;
   text-align: center;
@@ -74,12 +81,6 @@ area {
   font-size: 16px;
   color: #333;
   text-align: center;
-}
-
-/* Estilos adicionais */
-body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #f0f0f0;
 }
 
 /* Efeito de navegação nas setas */
@@ -111,4 +112,21 @@ body {
 /* Esconde as setas por padrão */
 #prev-btn, #next-btn {
   display: none;
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 768px) {
+  .img-container {
+      width: 90vw; /* Mais largura em telas pequenas */
+      margin-top: 50px; /* Menos margem no topo */
+  }
+
+  .modal-content {
+      width: 95%; /* Mais largura na modal */
+  }
+
+  .prev, .next {
+      font-size: 18px; /* Tamanho menor das setas em telas pequenas */
+      padding: 12px; /* Menos padding */
+  }
 }
