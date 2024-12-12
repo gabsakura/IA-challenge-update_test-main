@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: sensor-app
+    env: docker
+    buildCommand: docker build -t sensor-app .
+    startCommand: docker run -p $PORT:5001 sensor-app
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:///instance/database.db

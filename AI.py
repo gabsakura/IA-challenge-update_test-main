@@ -7,15 +7,13 @@ import AI_folder.AI_specs as AI_specs
 import numpy as np
 # ----------------------------------------
 
-GEMINI_API_KEY = "AIzaSyBow1PWoN12TuqSw7wudJP2NdAS0OcRYMo"
+# Configure API key
+GEMINI_API_KEY = "YOUR_API_KEY_HERE"
 genai.configure(api_key=GEMINI_API_KEY)
 
-def consulta(query: str):
-    # Implement your consultation logic here
-    return {"result": f"Processed query: {query}"}
-
-def consulta_schema():
-    return {
+# Define function declarations properly
+function_declarations = [
+    {
         "name": "consulta",
         "description": "Function to perform consultation",
         "parameters": {
@@ -29,23 +27,21 @@ def consulta_schema():
             "required": ["query"]
         }
     }
-
-tools = [
-    {
-        "function_declarations": [consulta_schema()]
-    }
 ]
 
-# Configure the model
-genai.configure(api_key='YOUR_API_KEY')
-
-# Initialize the model
+# Initialize the model with proper tool configuration
 model = genai.GenerativeModel(
     model_name="gemini-1.5-flash-latest",
-    tools=tools
+    generation_config={
+        "temperature": 0.9,
+        "top_p": 1,
+        "top_k": 1,
+        "max_output_tokens": 2048,
+    }
 )
 
-AI = model.start_chat(enable_automatic_function_calling=True, history=[])
+# Start chat without tools for now
+AI = model.start_chat(history=[])
 
 def AI_request(user_input: str) -> str:
     resposta = AI.send_message(user_input)

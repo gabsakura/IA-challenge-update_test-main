@@ -1,3 +1,19 @@
+import os
+from dotenv import load_dotenv
+
+# Get the absolute path to the instance folder
+basedir = os.path.abspath(os.path.dirname(__file__))
+instance_path = os.path.join(basedir, 'instance')
+
+# Ensure instance folder exists with proper permissions
+os.makedirs(instance_path, exist_ok=True)
+
+# Configure database path
+db_path = os.path.join(instance_path, 'dados.db')
+database_url = f'sqlite:///{db_path}'
+
+load_dotenv()
+
 from AI import AI_request, AI_predict, AI_pdf
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
@@ -12,7 +28,8 @@ from itsdangerous import URLSafeTimedSerializer
 serializer = URLSafeTimedSerializer('sua_chave_secreta')
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'sua_chave_secreta'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dados.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', database_url)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager()

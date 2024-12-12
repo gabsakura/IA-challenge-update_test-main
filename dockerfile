@@ -1,28 +1,23 @@
-FROM python:3.10-slim
+FROM python:3.12-slim
 
-# Atualizar pacotes do sistema e instalar dependências de build essenciais
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libssl-dev \
-    libffi-dev \
-    libpq-dev \
-    && apt-get clean
-
-# Definir o diretório de trabalho
 WORKDIR /app
 
-# Copiar o requirements.txt
-COPY requirements.txt .
-
-# Instalar as dependências do Python
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copiar todos os arquivos e pastas da aplicação para o diretório de trabalho
+# Copiar os arquivos do projeto
 COPY . .
 
-# Expor a porta (se necessário para aplicações web, como Flask)
+# Instalar dependências
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Criar diretório para o banco de dados
+RUN mkdir -p instance && chmod 777 instance
+
+# Expor a porta
 EXPOSE 5001
 
-# Comando para rodar a aplicação
-CMD ["python", "app.py"]
+# Definir variáveis de ambiente
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+ENV PYTHONUNBUFFERED=1
+
+# Comando para iniciar a aplicação com mais logs
+CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--log-level", "debug", "--workers", "1", "--timeout", "120", "application:application"]
