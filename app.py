@@ -455,6 +455,45 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route("/inserir_dados", methods=["POST"])
+def inserir_dados():
+    # Recebe os dados JSON
+    dados = request.get_json()
+
+    # Extrai os dados do JSON
+    temperatura = dados.get("temperatura")
+    vibracao_base = dados.get("vibracao_base")
+    corrente = dados.get("corrente")
+    data_registro = dados.get("data_registro")
+    vibracao_braco = dados.get("vibracao_braco")
+
+    # Conecta ao banco de dados SQLite3 e insere os dados na tabela
+    with sqlite3.connect('instance/dados.db') as conn:
+        cursor = conn.cursor()
+        
+        # Cria a tabela caso ainda não exista
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS sensor_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                temperatura REAL,
+                vibracao_base REAL,
+                corrente REAL,
+                data_registro TEXT,
+                vibracao_braco REAL
+            )
+        ''')
+        
+        # Insere os dados na tabela
+        cursor.execute('''
+            INSERT INTO dados (temperatura, vibracao_base, corrente, data_registro, vibracao_braco)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (temperatura, vibracao_base, corrente, data_registro, vibracao_braco))
+        conn.commit()
+
+    # Imprime os dados no console do Flask e retorna uma resposta de sucesso
+    print(dados)
+    return jsonify({"status": "sucesso", "mensagem": "Dados recebidos e armazenados com sucesso!"}), 200
+
 @app.route("/braco")
 def braco():
     return render_template("braco.html")

@@ -72,6 +72,8 @@ Vibrações - 5.5
 Ao converter uma solicitação em uma consulta SQL, certifique-se de adequar o comando conforme necessário. 
 Se uma pergunta já foi respondida anteriormente, reutilize o comando SQL, atualizando as datas quando necessário.
 
+Você nunca deve criar dados imaginários para os dias
+
 Exemplos de conversão de perguntas para consultas SQL:
 Caso o usuário peça os dados de um dia de apenas um sensor, como por exemplo: "me diga a temperatura do braço no dia 12 de Outubro".
 Use o seguinte comando SQL: SELECT AVG(temperatura) FROM dados WHERE data_registro LIKE '2024-10-21%'; 
@@ -107,7 +109,7 @@ Execute a função 'previsão', passando o dia, o mês e o ano solicitados, alé
 Apresente as informações retornadas pela função, retorne a resposta no mesmo idioma utilizado pelo usuário.
 
 Para um resumo diário, como: "Me diga os dados do dia 21 de maio.", execute a função consulta da seguinte forma, passe os números sempre com 2 caracteres no mínimo: 
-'consulta(pre_comando='dia', dia_='dia solicitado', mes_='mes solicitado, em número', ano_='ano solicitado')'
+'consulta(pre_comando='dia', dia_='dia solicitado', mes_='mes solicitado, em número', ano_='ano solicitado')', sempre passe dessa forma nesse caso
 Caso não exista dados para o dia solicitado. Retorne "Não existem dados para o dia [Dia solicitado]."
 Exiba apenas os dados que forem retornados pela função.
 Apresente o resumo assim, caso necessario traduza a mensagem para outra língua:

@@ -1,5 +1,6 @@
 # ------------- Importações --------------
 import google.generativeai as genai
+from google.ai import generativelanguage as glm
 from AI_folder.AI_functions import consulta, previsao, meses
 from fpdf import FPDF
 import AI_folder.AI_specs as AI_specs
@@ -9,11 +10,40 @@ import numpy as np
 GEMINI_API_KEY = "AIzaSyBow1PWoN12TuqSw7wudJP2NdAS0OcRYMo"
 genai.configure(api_key=GEMINI_API_KEY)
 
-model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest",
-                              generation_config=AI_specs.generation_config,
-                              system_instruction=AI_specs.system_instruction,
-                              safety_settings=AI_specs.safety_settings,
-                              tools = [consulta, previsao, meses])
+def consulta(query: str):
+    # Implement your consultation logic here
+    return {"result": f"Processed query: {query}"}
+
+def consulta_schema():
+    return {
+        "name": "consulta",
+        "description": "Function to perform consultation",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The query to process"
+                }
+            },
+            "required": ["query"]
+        }
+    }
+
+tools = [
+    {
+        "function_declarations": [consulta_schema()]
+    }
+]
+
+# Configure the model
+genai.configure(api_key='YOUR_API_KEY')
+
+# Initialize the model
+model = genai.GenerativeModel(
+    model_name="gemini-1.5-flash-latest",
+    tools=tools
+)
 
 AI = model.start_chat(enable_automatic_function_calling=True, history=[])
 
