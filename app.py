@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+
 # Get the absolute path to the template folder
 template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
 static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))

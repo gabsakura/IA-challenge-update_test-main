@@ -37,14 +37,23 @@
                         <div id="loading"></div>
                         <form id="messageArea" class="input-group">
                             <input type="text" id="text" name="msg" placeholder="Digite sua mensagem..."
-                                autocomplete="off" class="form-control type_msg" required />
+                                autocomplete="off" class="form-control type_msg" required disabled />
                             <div class="input-group-append">
-                                <button type="submit" id="send" class="input-group-text send_btn">
+                                <button type="submit" id="send" class="input-group-text send_btn" disabled>
                                     <i class="fas fa-location-arrow"></i>
                                 </button>
                             </div>
                         </form>
                     </div>
+                </div>
+                <div class="alert alert-warning mt-4" role="alert" style="text-align: center;">
+                    <h4 class="alert-heading">⚠️ Aviso Importante</h4>
+                    <p>O chat com IA está temporariamente desativado nesta versão pública.</p>
+                    <hr>
+                    <p class="mb-0">
+                        Por motivos de segurança, não podemos expor as chaves de API em um ambiente público.
+                        Para demonstrações do chat com IA, entre em contato com nossa equipe.
+                    </p>
                 </div>
             </div>
         </div>
