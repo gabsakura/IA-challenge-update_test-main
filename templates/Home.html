@@ -1,9 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
+
 <head>
-    <title>Home</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homepage do Projeto</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/Home.css') }}">
 </head>
+
 <body>
-    <h1>Welcome to the Sensor App</h1>
+  <main>
+    {% include 'components/header.html' %}
+
+    <!-- Seção do logo -->
+    <section class="logo-section hidden" id="logo">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo do Grupo" class="logo-img">
+    </section>
+
+    <!-- Seção do vídeo -->
+    <section class="video-section hidden" id="video">
+      <h2>Braço Robótico em Ação</h2>
+      <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/seu_video_id" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </section>
+
+    <!-- Seção de participantes -->
+    <section class="integrantes hidden" id="integrantes">
+      <h2>Participantes do Projeto</h2>
+      <div class="caixas">
+        <div class="Imagem-habilidade hidden" onMouseEnter="toggleText('integrante1')" onMouseLeave="toggleText(null)">
+          <img src="{{ url_for('static', filename='images/Vini.jpg') }}" alt="Vini">
+          <div class="texto-habilidade">Vinicíus Olivetti</div>
+          <div class="contribuicoes" id="integrante1">P.O do projeto, além de principal na parte elétrica e montagem do
+            projeto.</div>
+        </div>
+        <div class="Imagem-habilidade hidden" onMouseEnter="toggleText('integrante2')" onMouseLeave="toggleText(null)">
+          <img src="{{ url_for('static', filename='images/Dani.jpg') }}" alt="Dani">
+          <div class="texto-habilidade">Danilo Balbino</div>
+          <div class="contribuicoes" id="integrante2">Programador, atuando principamente na área de IA, sensores e no
+            braço robótico.
+          </div>
+        </div>
+        <div class="Imagem-habilidade hidden" onMouseEnter="toggleText('integrante3')" onMouseLeave="toggleText(null)">
+          <img src="{{ url_for('static', filename='images/Sakura.jpg') }}" alt="Sakura">
+          <div class="texto-habilidade">Gabriel Sakura</div>
+          <div class="contribuicoes" id="integrante3">Programador, atuando na área do site do projeto e auxiliando no
+            desenvolvimento.
+            IA</div>
+        </div>
+        <div class="Imagem-habilidade hidden" onMouseEnter="toggleText('integrante4')" onMouseLeave="toggleText(null)">
+          <img src="{{ url_for('static', filename='images/Gabu.jpg') }}" alt="Gabu">
+          <div class="texto-habilidade">Gabriel Pereira</div>
+          <div class="contribuicoes" id="integrante4">Desenhista.</div>
+        </div>
+        <div class="Imagem-habilidade hidden" onMouseEnter="toggleText('integrante5')" onMouseLeave="toggleText(null)">
+          <img src="{{ url_for('static', filename='images/Marchel.jpg') }}" alt="Marchel">
+          <div class="texto-habilidade">Marchel Auguto</div>
+          <div class="contribuicoes" id="integrante5">Financeiro.</div>
+        </div>
+      </div>
+      <div class="frase-domino">
+        Mova sobre as imagens para ver as contribuições!
+      </div>
+    </section>
+
+    <!-- Seção sobre a empresa -->
+    <section class="about-section hidden" id="sobre">
+      <div class="about-content">
+        <h1 class="about-title">Sobre a Empresa</h1>
+        <p class="about-text">
+          Bem-vindo ao FailGuard! Onde a inovação se encontra com a criatividade para criar 
+          experiências digitais verdadeiramente transformadoras. Somos uma equipe dedicada a 
+          desafiar os limites do que é possível, unindo design arrojado e tecnologia de ponta 
+          para oferecer soluções que não apenas atendem, mas superam as expectativas de nossos 
+          clientes.
+        </p>
+        <p class="about-text">
+          Desde a nossa fundação em 2024, temos nos concentrado no desenvolvimento de soluções 
+          de automação e inteligência digital que impactam positivamente diversos setores. Nossa 
+          paixão por inovação nos levou a explorar novas fronteiras tecnológicas, resultando em 
+          projetos que não apenas impulsionam a eficiência, mas também geram resultados surpreendentes 
+          para empresas de todos os tamanhos.
+        </p>
+        <p class="about-text">
+          Nossa missão é clara e audaciosa: transformar suas ideias em realidade. Buscamos facilitar 
+          a jornada das empresas, proporcionando soluções inteligentes que visam a redução de custos 
+          e a eliminação de complexidades operacionais. Acreditamos que a tecnologia deve ser uma 
+          aliada na busca pela excelência e estamos comprometidos em oferecer ferramentas que capacitem 
+          nossos clientes a alcançar seus objetivos com mais eficácia.
+        </p>
+        <p class="about-text">
+          Em um mundo em constante evolução, nossa visão é ser um parceiro confiável para a transformação 
+          digital. Trabalhamos incessantemente para desenvolver inovações que não apenas atendam às demandas 
+          do presente, mas que também preparem as empresas para os desafios do futuro. Estamos aqui para 
+          ajudar a sua empresa a se destacar, simplificando processos e promovendo um ambiente mais ágil e 
+          responsivo.
+        </p>
+      </div>
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='scripts/home.js') }}"></script>
 </body>
+
 </html>

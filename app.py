@@ -68,7 +68,7 @@ class User(db.Model, UserMixin):
 def home():
     logger.debug(f"Template folder: {app.template_folder}")
     logger.debug(f"Available templates: {os.listdir(app.template_folder)}")
-    return render_template("home.html")
+    return render_template("Home.html")
 def mes_para_numero(mes, a=False):
 
     if a: 
