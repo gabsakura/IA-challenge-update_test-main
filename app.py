@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
+
 # Get the absolute path to the instance folder
 basedir = os.path.abspath(os.path.dirname(__file__))
 instance_path = os.path.join(basedir, 'instance')
@@ -12,7 +14,8 @@ os.makedirs(instance_path, exist_ok=True)
 db_path = os.path.join(instance_path, 'dados.db')
 database_url = f'sqlite:///{db_path}'
 
-load_dotenv()
+# Configure a URL do banco de dados
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 from AI import AI_request, AI_predict, AI_pdf
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
@@ -27,8 +30,8 @@ from itsdangerous import URLSafeTimedSerializer
 
 serializer = URLSafeTimedSerializer('sua_chave_secreta')
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'sua_chave_secreta'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', database_url)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sua_chave_secreta')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///instance/dados.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -544,5 +547,6 @@ def pdf():
     
     return AI_pdf(filtros, leituras)
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host='0.0.0.0', port=port)
  

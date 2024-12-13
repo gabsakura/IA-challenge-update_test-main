@@ -1,9 +1,14 @@
 services:
   - type: web
     name: sensor-app
-    env: docker
-    buildCommand: docker build -t sensor-app .
-    startCommand: docker run -p $PORT:5001 sensor-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    rootDir: .
     envVars:
       - key: DATABASE_URL
-        value: sqlite:///instance/database.db
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        sync: false

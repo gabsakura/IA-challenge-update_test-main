@@ -1,22 +1,30 @@
-# Python
+# Ambiente virtual
+venv/
+env/
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.*.local
+
+# Arquivos do Python
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
 
-# Environment
-.env
-.env.local
-
-# Elastic Beanstalk
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
-
-# Database
+# Banco de dados SQLite
 instance/
 *.db
 
-# IDE
+# Logs
+*.log
+
+# IDEs e editores
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

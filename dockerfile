@@ -1,23 +1,16 @@
-FROM python:3.12-slim
+FROM python:3.8-slim
 
 WORKDIR /app
 
-# Copiar os arquivos do projeto
-COPY . .
-
-# Instalar dependências
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Criar diretório para o banco de dados
-RUN mkdir -p instance && chmod 777 instance
+COPY . .
 
-# Expor a porta
-EXPOSE 5001
+# Criar diretório instance se não existir
+RUN mkdir -p instance
 
-# Definir variáveis de ambiente
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=production
-ENV PYTHONUNBUFFERED=1
+# Garantir permissões corretas
+RUN chmod -R 777 instance
 
-# Comando para iniciar a aplicação com mais logs
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--log-level", "debug", "--workers", "1", "--timeout", "120", "application:application"]
+CMD gunicorn --bind 0.0.0.0:$PORT app:app
