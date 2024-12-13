@@ -52,7 +52,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 serializer = URLSafeTimedSerializer('sua_chave_secreta')
 
-# Modelos
+# Modelosz
 class Dados(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     info = db.Column(db.String(150))
