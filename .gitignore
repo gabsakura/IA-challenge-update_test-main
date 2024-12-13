@@ -11,6 +11,7 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # Banco de dados SQLite
 instance/

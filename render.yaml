@@ -6,8 +6,19 @@ services:
     startCommand: gunicorn app:app
     envVars:
       - key: DATABASE_URL
-        sync: false
-      - key: SECRET_KEY
-        sync: false
+        fromDatabase:
+          name: sensor-db
+          property: connectionString
       - key: PYTHON_VERSION
-        sync: false
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+    staticPublishPath: ./static
+    staticBuildPath: ./static
+    staticUrlPrefix: /static
+
+databases:
+  - name: sensor-db
+    databaseName: sensor_db
+    plan: free
+    ipAllowList: []

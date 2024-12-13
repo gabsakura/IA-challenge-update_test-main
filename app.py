@@ -1,5 +1,10 @@
 import os
 from dotenv import load_dotenv
+from urllib.parse import urlparse
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -12,10 +17,18 @@ os.makedirs(instance_path, exist_ok=True)
 
 # Configure database path
 db_path = os.path.join(instance_path, 'dados.db')
-database_url = f'sqlite:///{db_path}'
+database_url = os.getenv('DATABASE_URL')
 
-# Configure a URL do banco de dados
-DATABASE_URL = os.getenv('DATABASE_URL')
+# If using Render's PostgreSQL, fix the URL if needed
+if database_url and database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+# Configure SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///instance/dados.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize SQLAlchemy after configuration
+db = SQLAlchemy(app)
 
 from AI import AI_request, AI_predict, AI_pdf
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
@@ -27,9 +40,16 @@ import sqlite3
 from datetime import datetime, timedelta
 from itsdangerous import URLSafeTimedSerializer
 
+# Get the absolute path to the template folder
+template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
+static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
+
+# Create Flask app with explicit template and static folders
+app = Flask(__name__,
+            template_folder=template_dir,
+            static_folder=static_dir)
 
 serializer = URLSafeTimedSerializer('sua_chave_secreta')
-app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sua_chave_secreta')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///instance/dados.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -51,6 +71,8 @@ class User(db.Model, UserMixin):
 # Rota para a página inicial (Home)
 @app.route("/")
 def home():
+    logger.debug(f"Template folder: {app.template_folder}")
+    logger.debug(f"Available templates: {os.listdir(app.template_folder)}")
     return render_template("home.html")
 def mes_para_numero(mes, a=False):
 
@@ -383,7 +405,7 @@ def esqueci_senha():
             token = serializer.dumps(username, salt='senha_reset')
             return jsonify({"redirect": url_for('reset_senha', token=token, _external=True)})
         else:
-            return jsonify({"error": "Nome de usuário não encontrado"}), 404
+            return jsonify({"error": "Nome de usu��rio não encontrado"}), 404
     return render_template('esqueci_senha.html')
     
 @app.route('/reset_senha/<token>', methods=['GET', 'POST'])
@@ -546,6 +568,16 @@ def pdf():
     leituras = dados.get('data')
     
     return AI_pdf(filtros, leituras)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    app.logger.error(f'Server Error: {e}')
+    return render_template('500.html'), 500
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
     app.run(host='0.0.0.0', port=port)
