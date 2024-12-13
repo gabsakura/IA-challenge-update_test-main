@@ -11,6 +11,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from itsdangerous import URLSafeTimedSerializer
 from AI import AI_request, AI_predict, AI_pdf
+import jinja2
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -83,7 +84,14 @@ class User(db.Model, UserMixin):
 def home():
     logger.debug(f"Template folder: {app.template_folder}")
     logger.debug(f"Available templates: {os.listdir(app.template_folder)}")
-    return render_template("home.html")
+    try:
+        return render_template("casa.html")
+    except jinja2.exceptions.TemplateNotFound:
+        try:
+            return render_template("casa.html")
+        except jinja2.exceptions.TemplateNotFound:
+            logger.error("Nenhum template encontrado (tentou home.html e Home.html)")
+            return render_template("500.html"), 500
 
 def mes_para_numero(mes, a=False):
 
