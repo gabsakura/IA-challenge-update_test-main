@@ -3,19 +3,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Get the absolute path to the instance folder
-basedir = os.path.abspath(os.path.dirname(__file__))
-instance_path = os.path.join(basedir, 'instance')
-
-# Ensure instance folder exists with proper permissions
-os.makedirs(instance_path, exist_ok=True)
-
-# Configure database path
-db_path = os.path.join(instance_path, 'dados.db')
-database_url = f'sqlite:///{db_path}'
-
 # Configure a URL do banco de dados
 DATABASE_URL = os.getenv('DATABASE_URL')
+
+# Ajuste para o Postgres (necessário para o Render)
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 from AI import AI_request, AI_predict, AI_pdf
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
@@ -31,7 +24,7 @@ from itsdangerous import URLSafeTimedSerializer
 serializer = URLSafeTimedSerializer('sua_chave_secreta')
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sua_chave_secreta')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///instance/dados.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -40,7 +33,11 @@ login_manager.init_app(app)
 # Modelos
 class Dados(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    info = db.Column(db.String(150))
+    temperatura = db.Column(db.Float)
+    vibracao_base = db.Column(db.Float)
+    corrente = db.Column(db.Float)
+    data_registro = db.Column(db.String(150))
+    vibracao_braco = db.Column(db.Float)
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -477,41 +474,19 @@ def logout():
 
 @app.route("/inserir_dados", methods=["POST"])
 def inserir_dados():
-    # Recebe os dados JSON
     dados = request.get_json()
-
-    # Extrai os dados do JSON
-    temperatura = dados.get("temperatura")
-    vibracao_base = dados.get("vibracao_base")
-    corrente = dados.get("corrente")
-    data_registro = dados.get("data_registro")
-    vibracao_braco = dados.get("vibracao_braco")
-
-    # Conecta ao banco de dados SQLite3 e insere os dados na tabela
-    with sqlite3.connect('instance/dados.db') as conn:
-        cursor = conn.cursor()
-        
-        # Cria a tabela caso ainda não exista
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS sensor_data (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                temperatura REAL,
-                vibracao_base REAL,
-                corrente REAL,
-                data_registro TEXT,
-                vibracao_braco REAL
-            )
-        ''')
-        
-        # Insere os dados na tabela
-        cursor.execute('''
-            INSERT INTO dados (temperatura, vibracao_base, corrente, data_registro, vibracao_braco)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (temperatura, vibracao_base, corrente, data_registro, vibracao_braco))
-        conn.commit()
-
-    # Imprime os dados no console do Flask e retorna uma resposta de sucesso
-    print(dados)
+    
+    novo_dado = Dados(
+        temperatura=dados.get("temperatura"),
+        vibracao_base=dados.get("vibracao_base"),
+        corrente=dados.get("corrente"),
+        data_registro=dados.get("data_registro"),
+        vibracao_braco=dados.get("vibracao_braco")
+    )
+    
+    db.session.add(novo_dado)
+    db.session.commit()
+    
     return jsonify({"status": "sucesso", "mensagem": "Dados recebidos e armazenados com sucesso!"}), 200
 
 @app.route("/braco")
