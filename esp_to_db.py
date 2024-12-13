@@ -1,12 +1,27 @@
-import sqlite3
 import os
+import sqlite3
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 
-# Replace or add this configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-if app.config['SQLALCHEMY_DATABASE_URI'] and app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
+# Load environment variables
+load_dotenv()
 
+# Create Flask app
+app = Flask(__name__)
+
+# Configure database
+database_url = os.getenv('DATABASE_URL')
+
+# If using Render's PostgreSQL, fix the URL if needed
+if database_url and database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///instance/dados.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize SQLAlchemy
+db = SQLAlchemy(app)
 
 # Conectar ao banco de dados
 conn = sqlite3.connect('instance/dados.db')

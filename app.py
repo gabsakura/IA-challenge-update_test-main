@@ -2,35 +2,6 @@ import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse
 import logging
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-load_dotenv()
-
-# Get the absolute path to the instance folder
-basedir = os.path.abspath(os.path.dirname(__file__))
-instance_path = os.path.join(basedir, 'instance')
-
-# Ensure instance folder exists with proper permissions
-os.makedirs(instance_path, exist_ok=True)
-
-# Configure database path
-db_path = os.path.join(instance_path, 'dados.db')
-database_url = os.getenv('DATABASE_URL')
-
-# If using Render's PostgreSQL, fix the URL if needed
-if database_url and database_url.startswith('postgres://'):
-    database_url = database_url.replace('postgres://', 'postgresql://', 1)
-
-# Configure SQLAlchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///instance/dados.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Initialize SQLAlchemy after configuration
-db = SQLAlchemy(app)
-
-from AI import AI_request, AI_predict, AI_pdf
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -39,24 +10,48 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import sqlite3
 from datetime import datetime, timedelta
 from itsdangerous import URLSafeTimedSerializer
+from AI import AI_request, AI_predict, AI_pdf
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 # Get the absolute path to the template folder
 template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
 static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
 
-# Create Flask app with explicit template and static folders
+# Create Flask app first
 app = Flask(__name__,
             template_folder=template_dir,
             static_folder=static_dir)
 
-serializer = URLSafeTimedSerializer('sua_chave_secreta')
+# Get the absolute path to the instance folder
+basedir = os.path.abspath(os.path.dirname(__file__))
+instance_path = os.path.join(basedir, 'instance')
+
+# Ensure instance folder exists with proper permissions
+os.makedirs(instance_path, exist_ok=True)
+
+# Configure database
+database_url = os.getenv('DATABASE_URL')
+
+# If using Render's PostgreSQL, fix the URL if needed
+if database_url and database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+# Configure Flask app
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sua_chave_secreta')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///instance/dados.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///instance/dados.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize extensions
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
+serializer = URLSafeTimedSerializer('sua_chave_secreta')
+
 # Modelos
 class Dados(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -405,7 +400,7 @@ def esqueci_senha():
             token = serializer.dumps(username, salt='senha_reset')
             return jsonify({"redirect": url_for('reset_senha', token=token, _external=True)})
         else:
-            return jsonify({"error": "Nome de usu��rio não encontrado"}), 404
+            return jsonify({"error": "Nome de usuário não encontrado"}), 404
     return render_template('esqueci_senha.html')
     
 @app.route('/reset_senha/<token>', methods=['GET', 'POST'])
