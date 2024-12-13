@@ -42,8 +42,23 @@ if database_url and database_url.startswith('postgres://'):
 
 # Configure Flask app
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sua_chave_secreta')
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///instance/dados.db'
+
+# Garante que o diretório instance existe
+os.makedirs('instance', exist_ok=True)
+
+# Configure o banco de dados
+if database_url:
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Usando caminho absoluto para o arquivo SQLite
+    sqlite_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'dados.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{sqlite_path}'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # Initialize extensions
 db = SQLAlchemy(app)
@@ -69,6 +84,7 @@ def home():
     logger.debug(f"Template folder: {app.template_folder}")
     logger.debug(f"Available templates: {os.listdir(app.template_folder)}")
     return render_template("home.html")
+
 def mes_para_numero(mes, a=False):
 
     if a: 
@@ -572,6 +588,22 @@ def page_not_found(e):
 def internal_server_error(e):
     app.logger.error(f'Server Error: {e}')
     return render_template('500.html'), 500
+
+@app.route("/debug")
+def debug():
+    import os
+    files = os.listdir(app.template_folder)
+    template_path = os.path.join(app.template_folder, "home.html")
+    exists = os.path.exists(template_path)
+    return {
+        "template_folder": app.template_folder,
+        "files": files,
+        "home_exists": exists,
+        "template_path": template_path
+    }
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
