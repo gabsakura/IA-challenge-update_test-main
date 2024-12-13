@@ -4,7 +4,6 @@ services:
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
-    rootDir: .
     envVars:
       - key: DATABASE_URL
         sync: false
