@@ -5,10 +5,11 @@ from AI_folder.AI_functions import consulta, previsao, meses
 from fpdf import FPDF
 import AI_folder.AI_specs as AI_specs
 import numpy as np
+import os
 # ----------------------------------------
 
 # Configure API key
-GEMINI_API_KEY = "YOUR_API_KEY_HERE"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")  # Carrega a chave da API do arquivo .env
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Define function declarations properly
