@@ -45,7 +45,6 @@ if database_url and database_url.startswith('postgres://'):
 
 # Configure Flask app
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sua_chave_secreta')
-
 # Garante que o diretório instance existe
 os.makedirs('instance', exist_ok=True)
 
