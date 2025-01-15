@@ -38,12 +38,11 @@ model = genai.GenerativeModel(
         "top_p": 1,
         "top_k": 1,
         "max_output_tokens": 2048,
-    },
-    function_declarations=function_declarations
+    }
 )
 
-# Start chat with functions
-AI = model.start_chat(history=[], function_declarations=function_declarations)
+# Start chat without tools for now
+AI = model.start_chat(history=[])
 
 def AI_request(user_input: str) -> str:
     resposta = AI.send_message(user_input)
