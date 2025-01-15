@@ -38,13 +38,26 @@ os.makedirs(instance_path, exist_ok=True)
 
 # Configure database
 database_url = os.getenv('DATABASE_URL')
-logging.debug(f'DATABASE_URL: {database_url}')
 
-# Se estiver usando PostgreSQL, ajuste a URL se necessário
+# If using Render's PostgreSQL, fix the URL if needed
 if database_url and database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+# Configure Flask app
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sua_chave_secreta')
+
+# Garante que o diretório instance existe
+os.makedirs('instance', exist_ok=True)
+
+# Configure o banco de dados
+if database_url:
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Usando caminho absoluto para o arquivo SQLite
+    sqlite_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'dados.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{sqlite_path}'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
