@@ -2,55 +2,70 @@ import sqlite3
 from .SQL_comandos import *
 
 def consulta(sql_: str='', pre_comando: str = '', dia_: str='', mes_: str='', ano_:str= '', outro_:str = '') -> list:
-    print(f"sql_: {sql_}")
-    print(f"pre_comando: {pre_comando}")
-    print(f"dia_: {dia_}")
-    print(f"mes_: {mes_}")
-    print(f"ano_: {ano_}")
-    print(f"outro_: {outro_}")
-    
-    if pre_comando != '':
-        match pre_comando:
-            case 'mes':
-                sql = mes
-                sql = sql.replace("WHERE strftime('%m', data_registro) = '09' ", f"WHERE strftime('%m', data_registro) = '{mes_}' ")
-                sql = sql.replace("AND strftime('%Y', data_registro) = '2024'", f"AND strftime('%Y', data_registro) = '{ano_}'")
-            case 'ranking':
-                sql = ranking
-                sql = sql.replace("AVG(temperatura) AS media ", f"AVG({outro_}) AS media ")
-                sql = sql.replace("strftime('%d', data_registro) = '10' ", f"strftime('%d', data_registro) = '{dia_}' ")
-                sql = sql.replace("AND strftime('%Y', data_registro) = '2024'", f"AND strftime('%Y', data_registro) = '{ano_}'")
-            case 'dia':
-                sql = dia
-                sql = sql.replace("WHERE DATE(d.data_registro) = '2024-05-21'", f"WHERE DATE(d.data_registro) = '{ano_}-{mes_}-{dia_}'")
-    else:
-        sql = rf'{sql_}'
-        raw = r'\"'
-        raw2 = r"\'"
-        raw3 = r"\\"
-        raw4 = r"\\'"
-        if r'\"' in sql:
-            sql = sql.replace(raw, '"')
-        if r"\'" in sql:
-            sql = sql.replace(raw2, "'")
-        if r"\\" in sql:
-            sql = sql.replace(raw3, "")
-        if r"\\'" in sql:
-            sql = sql.replace(raw4, "'")
-        if r'\n' in sql:
-            sql = sql.replace(r'\n', '')
+    try:
+        # Log inicial dos parâmetros
+        print("\n=== Iniciando Consulta ===")
+        print(f"Parâmetros recebidos:")
+        print(f"- SQL: {sql_}")
+        print(f"- Pré-comando: {pre_comando}")
+        print(f"- Dia: {dia_}")
+        print(f"- Mês: {mes_}")
+        print(f"- Ano: {ano_}")
+        print(f"- Outro: {outro_}")
+        
+        # Construção da query
+        if pre_comando != '':
+            match pre_comando:
+                case 'mes':
+                    sql = mes
+                    print("\nConstruindo query mensal...")
+                    sql = sql.replace("WHERE strftime('%m', data_registro) = '09' ", f"WHERE strftime('%m', data_registro) = '{mes_}' ")
+                    sql = sql.replace("AND strftime('%Y', data_registro) = '2024'", f"AND strftime('%Y', data_registro) = '{ano_}'")
+                case 'ranking':
+                    sql = ranking
+                    print("\nConstruindo query de ranking...")
+                    sql = sql.replace("AVG(temperatura) AS media ", f"AVG({outro_}) AS media ")
+                    sql = sql.replace("strftime('%d', data_registro) = '10' ", f"strftime('%d', data_registro) = '{dia_}' ")
+                    sql = sql.replace("AND strftime('%Y', data_registro) = '2024'", f"AND strftime('%Y', data_registro) = '{ano_}'")
+                case 'dia':
+                    sql = dia
+                    print("\nConstruindo query diária...")
+                    sql = sql.replace("WHERE DATE(d.data_registro) = '2024-05-21'", f"WHERE DATE(d.data_registro) = '{ano_}-{mes_}-{dia_}'")
+        else:
+            sql = rf'{sql_}'
+            # Limpeza da string SQL
+            replacements = {
+                r'\"': '"',
+                r"\'": "'",
+                r"\\": "",
+                r"\\'": "'",
+                r'\n': ' '
+            }
+            for old, new in replacements.items():
+                sql = sql.replace(old, new)
 
-    #print(sql)
-    #print("----------------------")
-    conexao = sqlite3.connect('instance/dados.db')
-    c = conexao.cursor()
-    c.execute(sql)
-    resposta = c.fetchall()
-    conexao.close()
-    #print("Requisição feita \n----------------------")
-    
-    #print(resposta)
-    return resposta
+        print(f"\nSQL Final: {sql}")
+        
+        # Execução da query
+        conexao = sqlite3.connect('instance/dados.db')
+        c = conexao.cursor()
+        c.execute(sql)
+        resposta = c.fetchall()
+        conexao.close()
+        
+        print(f"\nResultados obtidos: {len(resposta)} registros")
+        print("Primeiros 3 registros (se houver):")
+        for i, reg in enumerate(resposta[:3]):
+            print(f"Registro {i+1}: {reg}")
+            
+        return resposta
+        
+    except Exception as e:
+        print(f"\nERRO na consulta: {str(e)}")
+        print("Stack trace:")
+        import traceback
+        traceback.print_exc()
+        return []
 
 class Motor:
     def __init__(self, nome, temperatura, corrente, vibracao):
@@ -108,39 +123,78 @@ class BracoRobotico:
         return previsoes
 
 def previsao(dia: str = '08', mes: str = '10', ano: str = '2024', msg_auto: bool = False):
-    if msg_auto:
-        comando = """
-        SELECT 
-            temperatura,
-            corrente,
-            vibracao_base,
-            vibracao_braco
-        FROM 
-            dados
-        ORDER BY 
-            data_registro DESC
-        LIMIT 1;
-        """
-    else:
-        comando = f"""
-        SELECT 
-            AVG(temperatura) AS media_temperatura,
-            AVG(corrente) AS media_corrente,
-            AVG(vibracao_base) AS media_vibracao_base,
-            AVG(vibracao_braco) AS media_vibracao_braco
-        FROM 
-            dados
-        WHERE 
-            DATE(data_registro) = '{ano}-{mes}-{dia}';
-        """
-    dados = consulta(comando)
-    print(dados)
-    temperatura, corrente, vibracao_base, vibracao_braco = dados[0]
-
-    braco = BracoRobotico(temperatura, corrente, [vibracao_base, vibracao_braco])
-
-    previsoes = braco.prever_falhas()
-    return braco.calcular_chance_total_falha(), previsoes
+    try:
+        print("\n=== Iniciando Previsão ===")
+        print(f"Parâmetros: dia={dia}, mes={mes}, ano={ano}, msg_auto={msg_auto}")
+        
+        # Validação básica dos parâmetros
+        if not msg_auto:
+            # Validar formato das datas
+            if not (dia.isdigit() and mes.isdigit() and ano.isdigit()):
+                raise ValueError("Dia, mês e ano devem ser números")
+            if not (1 <= int(dia) <= 31 and 1 <= int(mes) <= 12):
+                raise ValueError("Data inválida")
+        
+        # Construir a query apropriada
+        if msg_auto:
+            comando = """
+            SELECT 
+                temperatura,
+                corrente,
+                vibracao_base,
+                vibracao_braco
+            FROM 
+                dados
+            WHERE 
+                data_registro IS NOT NULL
+            ORDER BY 
+                data_registro DESC
+            LIMIT 1;
+            """
+        else:
+            comando = f"""
+            SELECT 
+                AVG(temperatura) AS media_temperatura,
+                AVG(corrente) AS media_corrente,
+                AVG(vibracao_base) AS media_vibracao_base,
+                AVG(vibracao_braco) AS media_vibracao_braco
+            FROM 
+                dados
+            WHERE 
+                DATE(data_registro) = '{ano}-{mes}-{dia}'
+            AND
+                data_registro IS NOT NULL;
+            """
+        
+        print(f"\nExecutando consulta: {comando}")
+        dados = consulta(comando)
+        
+        if not dados or not dados[0] or None in dados[0]:
+            raise ValueError("Não foram encontrados dados válidos para o período especificado")
+            
+        print(f"\nDados obtidos: {dados}")
+        temperatura, corrente, vibracao_base, vibracao_braco = dados[0]
+        
+        # Validação dos dados obtidos
+        if any(not isinstance(x, (int, float)) for x in [temperatura, corrente, vibracao_base, vibracao_braco]):
+            raise ValueError("Dados inválidos retornados da consulta")
+            
+        braco = BracoRobotico(temperatura, corrente, [vibracao_base, vibracao_braco])
+        previsoes = braco.prever_falhas()
+        chance_total = braco.calcular_chance_total_falha()
+        
+        print("\nResultados da previsão:")
+        print(f"Chance total: {chance_total}")
+        print(f"Previsões: {previsoes}")
+        
+        return chance_total, previsoes
+        
+    except Exception as e:
+        print(f"\nERRO na previsão: {str(e)}")
+        print("Stack trace:")
+        import traceback
+        traceback.print_exc()
+        return "Erro ao calcular previsão", []
 
 def meses():
     return consulta("SELECT DISTINCT strftime('%m', data_registro) AS mes FROM dados WHERE data_registro IS NOT NULL ORDER BY mes;")

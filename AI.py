@@ -2,95 +2,88 @@
 import google.generativeai as genai
 from google.ai import generativelanguage as glm
 from AI_folder.AI_functions import consulta, previsao, meses
-from fpdf import FPDF
+from functools import lru_cache
 import AI_folder.AI_specs as AI_specs
 import numpy as np
 import os
+import time
 # ----------------------------------------
 
-# Configure API key
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")  # Carrega a chave da API do arquivo .env
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Define function declarations properly
-function_declarations = [
-    {
-        "name": "consulta",
-        "description": "Function to perform consultation",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "The query to process"
-                }
-            },
-            "required": ["query"]
-        }
-    }
-]
-
-# Modifique a configuração do modelo para desabilitar respostas automáticas
+# Configuração otimizada do modelo para respostas mais rápidas
 model = genai.GenerativeModel(
     model_name="gemini-1.5-flash-latest",
     generation_config={
-        "temperature": 0.9,
-        "top_p": 1,
-        "top_k": 1,
-        "max_output_tokens": 2048,
-        "stop_sequences": ["Assistant:"]  # Adiciona sequência de parada
+        "temperature": 0.7,  # Reduzido para respostas mais focadas
+        "top_p": 0.95,
+        "top_k": 40,
+        "max_output_tokens": 1024,  # Reduzido para respostas mais concisas
+        "stop_sequences": ["Assistant:"]
     },
     safety_settings=[
-        {
-            "category": "HARM_CATEGORY_HARASSMENT",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_HATE_SPEECH",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-            "threshold": "BLOCK_NONE"
-        }
+        {"category": cat, "threshold": "BLOCK_NONE"}
+        for cat in ["HARM_CATEGORY_HARASSMENT", "HARM_CATEGORY_HATE_SPEECH", 
+                   "HARM_CATEGORY_SEXUALLY_EXPLICIT", "HARM_CATEGORY_DANGEROUS_CONTENT"]
     ]
 )
 
-# Inicialize o chat com um prompt inicial que define o comportamento
-initial_prompt = """Você deve apenas responder quando solicitado através das funções do sistema.
-Não envie mensagens automáticas ou respostas não solicitadas."""
+# Prompt inicial melhorado
+initial_prompt = """Você é um assistente eficiente e preciso. Siga estas diretrizes:
+1. Forneça respostas diretas e concisas
+2. Foque nos pontos principais da pergunta
+3. Use linguagem clara e objetiva
+4. Mantenha consistência nas respostas
+5. Peça esclarecimentos quando necessário
+
+Responda apenas quando solicitado através das funções do sistema."""
 
 AI = model.start_chat(history=[
     {"role": "user", "parts": [initial_prompt]},
-    {"role": "model", "parts": ["Entendido. Aguardarei as solicitações do sistema."]}
+    {"role": "model", "parts": ["Entendido. Pronto para fornecer respostas eficientes."]}
 ])
 
+# Cache para respostas comuns
+@lru_cache(maxsize=100)
+def cached_AI_request(user_input: str) -> str:
+    return AI_request_with_retry(user_input)
+
+def AI_request_with_retry(user_input: str, max_retries: int = 3) -> str:
+    print("\n=== Iniciando AI Request ===")
+    print(f"Input recebido: {user_input[:100]}...")
+    
+    for attempt in range(max_retries):
+        try:
+            print(f"\nTentativa {attempt + 1} de {max_retries}")
+            resposta = AI.send_message(user_input)
+            texto = resposta.text.rstrip('\n')
+            print(f"Resposta obtida ({len(texto)} caracteres): {texto[:100]}...")
+            return texto
+            
+        except Exception as e:
+            print(f"Erro na tentativa {attempt + 1}: {str(e)}")
+            if attempt == max_retries - 1:
+                print("Todas as tentativas falharam")
+                raise e
+            print(f"Aguardando {(attempt + 1) * 1}s antes da próxima tentativa")
+            time.sleep((attempt + 1) * 1)  # Backoff exponencial
+
 def AI_request(user_input: str) -> str:
-    resposta = AI.send_message(user_input)
-    texto_resposta = resposta.text
-
-    if '\n' in texto_resposta:
-        texto_resposta = texto_resposta.rstrip('\n')
-
-    return texto_resposta
+    # Verifica se a entrada é adequada para cache
+    if len(user_input) < 1000:  # Cache apenas para entradas menores
+        return cached_AI_request(user_input)
+    return AI_request_with_retry(user_input)
 
 def AI_predict() -> str:
     prev = previsao(msg_auto=True)
-
-    resposta = AI.send_message(f"Organize essas informações {prev}. Traduza para a idioma atual da conversa."
-                               f"Caso essa seja a primeira mensagem, escreva em português."
-                               f"Ao responder a essa mensagem, apresente apenas as informações.")
-
-    texto_resposta = resposta.text
-    if '\n' in texto_resposta:
-        texto_resposta = texto_resposta.rstrip('\n')
-
-    return texto_resposta
-
+    prompt = (
+        f"Organize de forma concisa estas informações: {prev}. "
+        "Traduza para o idioma atual da conversa. "
+        "Se for a primeira mensagem, use português. "
+        "Apresente apenas as informações essenciais."
+    )
+    return AI_request(prompt)
 
 def AI_pdf(filtros, leituras):
     temperatura = np.mean(leituras["temperatura"])
