@@ -30,7 +30,7 @@ function_declarations = [
     }
 ]
 
-# Initialize the model with proper tool configuration
+# Modifique a configuração do modelo para desabilitar respostas automáticas
 model = genai.GenerativeModel(
     model_name="gemini-1.5-flash-latest",
     generation_config={
@@ -38,11 +38,36 @@ model = genai.GenerativeModel(
         "top_p": 1,
         "top_k": 1,
         "max_output_tokens": 2048,
-    }
+        "stop_sequences": ["Assistant:"]  # Adiciona sequência de parada
+    },
+    safety_settings=[
+        {
+            "category": "HARM_CATEGORY_HARASSMENT",
+            "threshold": "BLOCK_NONE"
+        },
+        {
+            "category": "HARM_CATEGORY_HATE_SPEECH",
+            "threshold": "BLOCK_NONE"
+        },
+        {
+            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            "threshold": "BLOCK_NONE"
+        },
+        {
+            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+            "threshold": "BLOCK_NONE"
+        }
+    ]
 )
 
-# Start chat without tools for now
-AI = model.start_chat(history=[])
+# Inicialize o chat com um prompt inicial que define o comportamento
+initial_prompt = """Você deve apenas responder quando solicitado através das funções do sistema.
+Não envie mensagens automáticas ou respostas não solicitadas."""
+
+AI = model.start_chat(history=[
+    {"role": "user", "parts": [initial_prompt]},
+    {"role": "model", "parts": ["Entendido. Aguardarei as solicitações do sistema."]}
+])
 
 def AI_request(user_input: str) -> str:
     resposta = AI.send_message(user_input)

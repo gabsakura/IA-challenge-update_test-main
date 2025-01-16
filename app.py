@@ -567,15 +567,18 @@ def asd():
 def index():
     return render_template("chat.html")
 
-@app.route("/get", methods = ["GET", "POST"])
+@app.route("/get", methods=["GET", "POST"])
 def chat():
     input = request.form["msg"]
     
+    # Verifica se a mensagem contém "pdf"
     if "pdf" in input.lower():
         AI_pdf(input)
         return jsonify(url=f'relatório.pdf')
-    else:
-        return AI_request(input)
+    
+    # Caso contrário, apenas chama AI_request e retorna a resposta
+    resposta = AI_request(input)
+    return jsonify(resposta=resposta)  # Retorna apenas a resposta da IA
 
 @app.route("/auto", methods = ["GET"])
 def automatic_message():
