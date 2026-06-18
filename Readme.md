@@ -30,7 +30,7 @@ This project is a web application developed with Flask that monitors and visuali
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/sensor-monitoring-system.git
+git clone https://github.com/gabsakura/IA-challenge-update_test-main.git
 cd sensor-monitoring-system
 ```
 
