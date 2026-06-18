@@ -1,5 +1,8 @@
 import os
 from dotenv import load_dotenv
+
+load_dotenv()
+
 from urllib.parse import urlparse
 import logging
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
@@ -15,10 +18,6 @@ import jinja2
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-load_dotenv()
-
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Get the absolute path to the template folder
 template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
@@ -68,7 +67,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
-serializer = URLSafeTimedSerializer('sua_chave_secreta')
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 # Modelosz
 class Dados(db.Model):
@@ -569,20 +568,30 @@ def index():
 
 @app.route("/get", methods=["GET", "POST"])
 def chat():
-    input = request.form["msg"]
-    
-    # Verifica se a mensagem contém "pdf"
-    if "pdf" in input.lower():
-        AI_pdf(input)
-        return jsonify(url=f'relatório.pdf')
-    
-    # Caso contrário, apenas chama AI_request e retorna a resposta
-    resposta = AI_request(input)
-    return jsonify(resposta=resposta)  # Retorna apenas a resposta da IA
+    input = request.form.get("msg", "").strip()
+    if not input:
+        return jsonify(resposta="Envie uma mensagem para continuar."), 400
 
-@app.route("/auto", methods = ["GET"])
+    try:
+        if "pdf" in input.lower():
+            AI_pdf(input)
+            return jsonify(resposta="Relatório PDF gerado.", url="relatório.pdf")
+
+        resposta = AI_request(input)
+        return jsonify(resposta=resposta)
+    except Exception as e:
+        logger.exception("Erro na rota /get")
+        return jsonify(
+            resposta="Não foi possível obter resposta da IA. Verifique GEMINI_API_KEY no .env."
+        ), 500
+
+@app.route("/auto", methods=["GET"])
 def automatic_message():
-    return AI_predict()
+    try:
+        return AI_predict()
+    except Exception as e:
+        logger.exception("Erro na rota /auto")
+        return "Previsão indisponível: configure GEMINI_API_KEY no .env.", 500
 
 @app.route("/pdf", methods = ["POST"])
 def pdf():

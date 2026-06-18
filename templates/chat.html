@@ -121,12 +121,16 @@ $(document).ready(function () {
             url: "/get",
         }).done(function (data) {
             $("#loading").hide();
+
+            const resposta = typeof data === "object" ? (data.resposta || data.url || "") : data;
                 
             let botHtml;
-            if (data.startsWith('http') && data.endsWith('.pdf')) {
-                botHtml = createDownloadLink(data);
+            if (typeof resposta === "string" && resposta.startsWith('http') && resposta.endsWith('.pdf')) {
+                botHtml = createDownloadLink(resposta);
+            } else if (data.url) {
+                botHtml = createDownloadLink(data.url);
             } else {
-                botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="' + IMG_URL + '" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + formatText(data).replace(/\n/g, "<br>") + '<span class="msg_time">' + str_time + '</span></div></div>';
+                botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="' + IMG_URL + '" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + formatText(resposta).replace(/\n/g, "<br>") + '<span class="msg_time">' + str_time + '</span></div></div>';
             }
 
             $("#messageFormeight").append($.parseHTML(botHtml));

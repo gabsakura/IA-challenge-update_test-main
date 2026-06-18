@@ -1,16 +1,15 @@
-FROM python:3.8-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-l
+
 COPY . .
 
-# Criar diretório instance se não existir
-RUN mkdir -p instance
+RUN mkdir -p instance && chmod -R 777 instance
 
-# Garantir permissões corretas
-RUN chmod -R 777 instance
+ENV PORT=5001
+EXPOSE 5001
 
-CMD gunicorn --bind 0.0.0.0:$PORT app:app
+CMD gunicorn --bind 0.0.0.0:${PORT} app:app

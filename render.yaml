@@ -13,6 +13,8 @@ services:
         value: 3.11.0
       - key: SECRET_KEY
         generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
     staticPublishPath: ./static
     staticBuildPath: ./static
     staticUrlPrefix: /static

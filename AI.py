@@ -1,36 +1,38 @@
 # ------------- Importações --------------
 import google.generativeai as genai
-from google.ai import generativelanguage as glm
 from AI_folder.AI_functions import consulta, previsao, meses
 from functools import lru_cache
-import AI_folder.AI_specs as AI_specs
 import numpy as np
 import os
 import time
+from dotenv import load_dotenv
 # ----------------------------------------
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
+load_dotenv()
 
-# Configuração otimizada do modelo para respostas mais rápidas
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash-latest",
-    generation_config={
-        "temperature": 0.7,  # Reduzido para respostas mais focadas
-        "top_p": 0.95,
-        "top_k": 40,
-        "max_output_tokens": 1024,  # Reduzido para respostas mais concisas
-        "stop_sequences": ["Assistant:"]
-    },
-    safety_settings=[
-        {"category": cat, "threshold": "BLOCK_NONE"}
-        for cat in ["HARM_CATEGORY_HARASSMENT", "HARM_CATEGORY_HATE_SPEECH", 
-                   "HARM_CATEGORY_SEXUALLY_EXPLICIT", "HARM_CATEGORY_DANGEROUS_CONTENT"]
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+
+MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+
+GENERATION_CONFIG = {
+    "temperature": 0.7,
+    "top_p": 0.95,
+    "top_k": 40,
+    "max_output_tokens": 1024,
+    "stop_sequences": ["Assistant:"],
+}
+
+SAFETY_SETTINGS = [
+    {"category": cat, "threshold": "BLOCK_NONE"}
+    for cat in [
+        "HARM_CATEGORY_HARASSMENT",
+        "HARM_CATEGORY_HATE_SPEECH",
+        "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "HARM_CATEGORY_DANGEROUS_CONTENT",
     ]
-)
+]
 
-# Prompt inicial melhorado
-initial_prompt = """Você é um assistente eficiente e preciso. Siga estas diretrizes:
+INITIAL_PROMPT = """Você é um assistente eficiente e preciso. Siga estas diretrizes:
 1. Forneça respostas diretas e concisas
 2. Foque nos pontos principais da pergunta
 3. Use linguagem clara e objetiva
@@ -39,10 +41,39 @@ initial_prompt = """Você é um assistente eficiente e preciso. Siga estas diret
 
 Responda apenas quando solicitado através das funções do sistema."""
 
-AI = model.start_chat(history=[
-    {"role": "user", "parts": [initial_prompt]},
-    {"role": "model", "parts": ["Entendido. Pronto para fornecer respostas eficientes."]}
-])
+_chat_session = None
+
+
+def _get_api_key() -> str:
+    key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if not key:
+        raise RuntimeError(
+            "Chave da API Gemini não configurada. "
+            "Defina GEMINI_API_KEY ou GOOGLE_API_KEY no arquivo .env (local) "
+            "ou nas variáveis de ambiente do servidor."
+        )
+    return key
+
+
+def _get_chat():
+    global _chat_session
+    if _chat_session is None:
+        genai.configure(api_key=_get_api_key())
+        model = genai.GenerativeModel(
+            model_name=MODEL_NAME,
+            generation_config=GENERATION_CONFIG,
+            safety_settings=SAFETY_SETTINGS,
+        )
+        _chat_session = model.start_chat(
+            history=[
+                {"role": "user", "parts": [INITIAL_PROMPT]},
+                {
+                    "role": "model",
+                    "parts": ["Entendido. Pronto para fornecer respostas eficientes."],
+                },
+            ]
+        )
+    return _chat_session
 
 # Cache para respostas comuns
 @lru_cache(maxsize=100)
@@ -56,7 +87,7 @@ def AI_request_with_retry(user_input: str, max_retries: int = 3) -> str:
     for attempt in range(max_retries):
         try:
             print(f"\nTentativa {attempt + 1} de {max_retries}")
-            resposta = AI.send_message(user_input)
+            resposta = _get_chat().send_message(user_input)
             texto = resposta.text.rstrip('\n')
             print(f"Resposta obtida ({len(texto)} caracteres): {texto[:100]}...")
             return texto

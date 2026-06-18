@@ -32,9 +32,10 @@ $(document).ready(function () {
             url: "/get",
         }).done(function (data) {
             $("#loading").hide();  // Esconde o carregando
+            var resposta = typeof data === "object" ? (data.resposta || data.url || "") : data;
             var botHtml =
                 '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' +
-                data +
+                resposta +
                 '<span class="msg_time">' +
                 str_time +
                 "</span></div></div>";
