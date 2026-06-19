@@ -100,7 +100,7 @@ def AI_predict() -> str:
 
 def AI_pdf(filtros, leituras):
     temperatura = np.mean(leituras["temperatura"]) if leituras.get("temperatura") else 0
-    corrente = np.mean(leitures["corrente"]) if leituras.get("corrente") else 0
+    corrente = np.mean(leituras["corrente"]) if leituras.get("corrente") else 0
     vibracao_base = np.mean(leituras["vibracao_base"]) if leituras.get("vibracao_base") else 0
     vibracao_braco = np.mean(leituras["vibracao_braco"]) if leituras.get("vibracao_braco") else 0
     data_registro = leituras.get("timestamp", [])

@@ -332,7 +332,7 @@ def inserir_dados():
         cursor.execute('''
             INSERT INTO dados (temperatura, vibracao_base, corrente, data_registro, vibracao_braco)
             VALUES (?, ?, ?, ?, ?)
-        ''', (temperatura, vibracao_base, corriente, data_registro, vibracao_braco))
+        ''', (temperatura, vibracao_base, corrente, data_registro, vibracao_braco))
         conn.commit()
 
     return jsonify({"status": "sucesso"}), 200
