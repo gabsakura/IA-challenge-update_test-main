@@ -19,60 +19,47 @@ import jinja2
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Get the absolute path to the template folder
 template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
 static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
 
-# Create Flask app first
-app = Flask(__name__,
-            template_folder=template_dir,
-            static_folder=static_dir)
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
-# Get the absolute path to the instance folder
 basedir = os.path.abspath(os.path.dirname(__file__))
 instance_path = os.path.join(basedir, 'instance')
-
-# Ensure instance folder exists with proper permissions
 os.makedirs(instance_path, exist_ok=True)
 
-# Configure database
 database_url = os.getenv('DATABASE_URL')
-
-# If using Render's PostgreSQL, fix the URL if needed
 if database_url and database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-# Configure Flask app
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sua_chave_secreta')
 
-# Garante que o diretório instance existe
-os.makedirs('instance', exist_ok=True)
-
-# Configure o banco de dados
 if database_url:
-    if database_url.startswith('postgres://'):
-        database_url = database_url.replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 else:
-    # Usando caminho absoluto para o arquivo SQLite
-    sqlite_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'dados.db')
+    sqlite_path = os.path.join(basedir, 'instance', 'dados.db')
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{sqlite_path}'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-# Initialize extensions
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
-# Modelosz
+
+# Mapeamento do modelo corrigido para refletir a estrutura real do banco de dados de sensores
 class Dados(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    info = db.Column(db.String(150))
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    temperatura = db.Column(db.Float)
+    corrente = db.Column(db.Float)
+    vibracao_base = db.Column(db.Float)
+    vibracao_braco = db.Column(db.Float)
+    data_registro = db.Column(db.String(50))
+
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -80,84 +67,38 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150), nullable=False)
     is_admin = db.Column(db.Boolean, default=False) 
 
-# Rota para a página inicial (Home)
+
 @app.route("/")
 def home():
-    logger.debug(f"Template folder: {app.template_folder}")
-    logger.debug(f"Available templates: {os.listdir(app.template_folder)}")
     try:
         return render_template("casa.html")
     except jinja2.exceptions.TemplateNotFound:
-        try:
-            return render_template("casa.html")
-        except jinja2.exceptions.TemplateNotFound:
-            logger.error("Nenhum template encontrado (tentou home.html e Home.html)")
-            return render_template("500.html"), 500
+        return render_template("500.html"), 500
+
 
 def mes_para_numero(mes, a=False):
+    meses = {
+        "janeiro": '01' if a else 1, "fevereiro": '02' if a else 2,
+        "março": '03' if a else 3, "abril": '04' if a else 4,
+        "maio": '05' if a else 5, "junho": '06' if a else 6,
+        "julho": '07' if a else 7, "agosto": '08' if a else 8,
+        "setembro": '09' if a else 9, "outubro": '10' if a else 10,
+        "novembro": '11' if a else 11, "dezembro": '12' if a else 12
+    }
+    return meses.get(mes.lower(), "Mês inválido")
 
-    if a: 
-        meses = {
-        "janeiro": '01',
-        "fevereiro": '02',
-        "março": '03',
-        "abril": '04',
-        "maio": '05',
-        "junho": '06',
-        "julho": '07',
-        "agosto": '08',
-        "setembro": '09',
-        "outubro": '10',
-        "novembro": '11',
-        "dezembro": '12'
-        }
-    else:
-        meses = {
-        "janeiro": 1,
-        "fevereiro": 2,
-        "março" : 3,
-        "abril": 4,
-        "maio": 5,
-        "junho": 6,
-        "julho": 7,
-        "agosto": 8,
-        "setembro": 9,
-        "outubro": 10,
-        "novembro": 11,
-        "dezembro": 12
-        }
-    mes_lower = mes.lower()
-
-    return meses.get(mes_lower, "Mês inválido")
 
 def obter_dias_da_semana(mes, numero_semana):
-    # Verifica se o mês e o número da semana são válidos
     numero_semana = int(numero_semana)
     if mes < 1 or mes > 12:
-        return "Mês inválido. Deve ser entre 1 e 12."
-    if numero_semana < 1 or numero_semana > 4:
-        return "Número da semana inválido. Deve ser entre 1 e 4."
-
-    # Obtém o ano atual
+        return "Mês inválido."
     ano_atual = datetime.now().year
-
-    # Calcula o primeiro dia do mês
     primeiro_dia_do_mes = datetime(ano_atual, mes, 1)
-
-    # Calcula o último dia do mês
     ultimo_dia_do_mes = (primeiro_dia_do_mes + timedelta(days=31)).replace(day=1) - timedelta(days=1)
-
-    # Calcula o início da semana
     inicio_semana = primeiro_dia_do_mes + timedelta(weeks=numero_semana - 1)
-
-    # Calcula o fim da semana
     fim_semana = inicio_semana + timedelta(days=6)
-
-    # Se o fim da semana ultrapassa o último dia do mês, ajusta
     if fim_semana > ultimo_dia_do_mes:
         fim_semana = ultimo_dia_do_mes
-
-    # Retorna os dias como strings com 2 caracteres
     return f"{inicio_semana.day:02}", f"{fim_semana.day:02}"
 
 
@@ -166,7 +107,7 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
     cursor = conn.cursor()
     match time_range:
         case "day":
-            comando_sql = f"""
+            comando_sql = """
             SELECT 
                 GROUP_CONCAT(temperatura) AS dados_temperatura,
                 GROUP_CONCAT(corrente) AS dados_corrente,
@@ -174,40 +115,22 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
                 GROUP_CONCAT(vibracao_braco) AS dados_vibracao_braco,
                 GROUP_CONCAT(strftime('%H:%M', data_registro)) AS horas
             FROM dados
-            WHERE DATE(data_registro) = '{day}';
+            WHERE DATE(data_registro) = ?;
             """
-            cursor.execute(comando_sql)
+            cursor.execute(comando_sql, (day,))
             rows = cursor.fetchall()
             conn.close()
 
-            dados_temperatura_str = rows[0][0]  # Ex: "24,25,24"
-            dados_corrente_str = rows[0][1]     # Ex: "1,4,2"
-            dados_vibracao_base_str = rows[0][2] # Ex: "1.1,2.1,3.5"
-            dados_vibracao_braco_str = rows[0][3] # Ex: "2.5,3.2,5.5"
-            horas_str = rows[0][4]               # Ex: "08:00:00,08:15:00"
+            if not rows or not rows[0][0]:
+                return {'temperatura': [], 'corrente': [], 'vibracao_base': [], 'vibracao_braco': [], 'timestamp': []}
 
-            # Transformar os dados em listas
-            dados_temperatura = list(map(float, dados_temperatura_str.split(','))) if dados_temperatura_str else []
-            dados_corrente = list(map(float, dados_corrente_str.split(','))) if dados_corrente_str else []
-            dados_vibracao_base = list(map(float, dados_vibracao_base_str.split(','))) if dados_vibracao_base_str else []
-            dados_vibracao_braco = list(map(float, dados_vibracao_braco_str.split(','))) if dados_vibracao_braco_str else []
-            horas = horas_str.split(',') if horas_str else []
-
-            # Combinar todas as listas em uma única lista
-            lista_unica = [dados_temperatura, dados_corrente, dados_vibracao_base, dados_vibracao_braco, horas]
-
-
-            print(lista_unica[4])
-            # Estruturar os dados em um formato de dicionário
-            data = {
-                'temperatura': lista_unica[0],
-                'corrente': lista_unica[1],
-                'vibracao_base': lista_unica[2],
-                'vibracao_braco': lista_unica[3],
-                'timestamp': lista_unica[4]
+            return {
+                'temperatura': list(map(float, rows[0][0].split(','))),
+                'corrente': list(map(float, rows[0][1].split(','))),
+                'vibracao_base': list(map(float, rows[0][2].split(','))),
+                'vibracao_braco': list(map(float, rows[0][3].split(','))),
+                'timestamp': rows[0][4].split(',')
             }
-
-            return data
 
         case "week":
             mes = mes_para_numero(mesSemana, a=True)
@@ -215,327 +138,189 @@ def get_sensor_data(time_range, day, month, week, year, mesSemana):
             comando_sql = f"""
             SELECT 
                 strftime('%Y-%m-%d', data_registro) AS dia,
-                AVG(temperatura) AS media_temperatura,
-                AVG(corrente) AS media_corrente,
-                AVG(vibracao_base) AS media_vibracao_base,
-                AVG(vibracao_braco) AS media_vibracao_braco
+                AVG(temperatura), AVG(corrente), AVG(vibracao_base), AVG(vibracao_braco)
             FROM dados
-            WHERE 
-                strftime('%Y', data_registro) = '2024' AND
-                strftime('%m', data_registro) = '{mes}' AND
-                data_registro >= date('2024-{mes}-{dias[0]}') AND 
-                data_registro <= date('2024-{mes}-{dias[1]}')
-            GROUP BY dia  -- Agrupa pelos dias para calcular as médias
-            ORDER BY dia;
+            WHERE strftime('%Y', data_registro) = '2024' AND strftime('%m', data_registro) = ?
+            AND data_registro >= date('2024-{mes}-{dias[0]}') AND data_registro <= date('2024-{mes}-{dias[1]}')
+            GROUP BY dia ORDER BY dia;
             """
-            cursor.execute(comando_sql)
-            resultados = cursor.fetchall()  # Busca todos os resultados
+            cursor.execute(comando_sql, (mes,))
+            resultados = cursor.fetchall()
             conn.close()
 
-            # Inicializa listas para armazenar os dados
-            dias_list = []
-            media_temperatura_list = []
-            media_corrente_list = []
-            media_vibracao_base_list = []
-            media_vibracao_braco_list = []
-
-            # Processa os resultados
-            for linha in resultados:
-                dias_list.append(linha[0])  # Dia
-                media_temperatura_list.append(linha[1])  # Média de Temperatura
-                media_corrente_list.append(linha[2])  # Média de Corrente
-                media_vibracao_base_list.append(linha[3])  # Média de Vibração Base
-                media_vibracao_braco_list.append(linha[4])  # Média de Vibração do Braço
-
-            # Junta todas as listas em uma única lista
-            dados_combinados = [
-                media_temperatura_list,
-                media_corrente_list,
-                media_vibracao_base_list,
-                media_vibracao_braco_list,
-                dias_list
-            ]
-
-            data = {
-                'temperatura': dados_combinados[0],
-                'corrente': dados_combinados[1],
-                'vibracao_base': dados_combinados[2],
-                'vibracao_braco': dados_combinados[3],
-                'timestamp': dados_combinados[4]
+            return {
+                'temperatura': [r[1] for r in resultados],
+                'corrente': [r[2] for r in resultados],
+                'vibracao_base': [r[3] for r in resultados],
+                'vibracao_braco': [r[4] for r in resultados],
+                'timestamp': [r[0] for r in resultados]
             }
-
-            return data
 
         case "month":
             mes = mes_para_numero(month, a=True)
-            comando_sql = f"""
+            comando_sql = """
             SELECT 
                 strftime('%Y-%m-%W', data_registro) AS semana,
-                AVG(temperatura) AS media_temperatura,
-                AVG(corrente) AS media_corrente,
-                AVG(vibracao_base) AS media_vibracao_base,
-                AVG(vibracao_braco) AS media_vibracao_braco
+                AVG(temperatura), AVG(corrente), AVG(vibracao_base), AVG(vibracao_braco)
             FROM dados
-            WHERE 
-                strftime('%Y', data_registro) = '2024' AND
-                strftime('%m', data_registro) = '{mes}'
-            GROUP BY semana
-            ORDER BY semana;
+            WHERE strftime('%Y', data_registro) = '2024' AND strftime('%m', data_registro) = ?
+            GROUP BY semana ORDER BY semana;
             """
-
-            # Executa a consulta SQL
-            cursor.execute(comando_sql)
-            resultados = cursor.fetchall()  # Busca todos os resultados
+            cursor.execute(comando_sql, (mes,))
+            resultados = cursor.fetchall()
             conn.close()
 
-            # Inicializa listas para armazenar os dados
-            media_temperatura_list = []
-            media_corrente_list = []
-            media_vibracao_base_list = []
-            media_vibracao_braco_list = []
-            semanas_list = []
-
-            # Processa os resultados
-            for linha in resultados:
-                semanas_list.append(linha[0])  # Semana
-                media_temperatura_list.append(linha[1])  # Média de Temperatura
-                media_corrente_list.append(linha[2])  # Média de Corrente
-                media_vibracao_base_list.append(linha[3])  # Média de Vibração Base
-                media_vibracao_braco_list.append(linha[4])  # Média de Vibração do Braço
-
-            # Junta todas as listas em uma única lista
-            dados_combinados = [
-                media_temperatura_list,
-                media_corrente_list,
-                media_vibracao_base_list,
-                media_vibracao_braco_list,
-                semanas_list
-            ]
-
-            data = {
-                'temperatura': dados_combinados[0],
-                'corrente': dados_combinados[1],
-                'vibracao_base': dados_combinados[2],
-                'vibracao_braco': dados_combinados[3],
-                'timestamp': dados_combinados[4]
+            return {
+                'temperatura': [r[1] for r in resultados],
+                'corrente': [r[2] for r in resultados],
+                'vibracao_base': [r[3] for r in resultados],
+                'vibracao_braco': [r[4] for r in resultados],
+                'timestamp': [r[0] for r in resultados]
             }
-
-            return data
 
         case 'year': 
-            comando_sql = f"""
-                SELECT 
-                    strftime('%m', data_registro) AS mes,
-                    AVG(temperatura) AS media_temperatura,
-                    AVG(corrente) AS media_corrente,
-                    AVG(vibracao_base) AS media_vibracao_base,
-                    AVG(vibracao_braco) AS media_vibracao_braco
-                FROM dados
-                WHERE 
-                    strftime('%Y', data_registro) = '{year}'
-                GROUP BY mes
-                ORDER BY mes;
-                """
-
-            # Executa a consulta SQL
-            cursor.execute(comando_sql)
-            resultados = cursor.fetchall()  # Busca todos os resultados
+            comando_sql = """
+            SELECT 
+                strftime('%m', data_registro) AS mes,
+                AVG(temperatura), AVG(corrente), AVG(vibracao_base), AVG(vibracao_braco)
+            FROM dados
+            WHERE strftime('%Y', data_registro) = ?
+            GROUP BY mes ORDER BY mes;
+            """
+            cursor.execute(comando_sql, (year,))
+            resultados = cursor.fetchall()
             conn.close()
 
-            # Inicializa listas para armazenar os dados
-            media_temperatura_list = []
-            media_corrente_list = []
-            media_vibracao_base_list = []
-            media_vibracao_braco_list = []
-            meses_list = []
-
-            # Processa os resultados e separa em listas
-            for linha in resultados:
-                meses_list.append(linha[0])  # Mês
-                media_temperatura_list.append(linha[1])  # Média de Temperatura
-                media_corrente_list.append(linha[2])  # Média de Corrente
-                media_vibracao_base_list.append(linha[3])  # Média de Vibração Base
-                media_vibracao_braco_list.append(linha[4])  # Média de Vibração do Braço
-
-            # Junta todas as listas em uma única lista
-            dados_combinados = [
-                media_temperatura_list,
-                media_corrente_list,
-                media_vibracao_base_list,
-                media_vibracao_braco_list,
-                meses_list
-            ]
-
-            print(dados_combinados)
-            data = {
-                'temperatura': dados_combinados[0],
-                'corrente': dados_combinados[1],
-                'vibracao_base': dados_combinados[2],
-                'vibracao_braco': dados_combinados[3],
-                'timestamp': dados_combinados[4]
+            return {
+                'temperatura': [r[1] for r in resultados],
+                'corrente': [r[2] for r in resultados],
+                'vibracao_base': [r[3] for r in resultados],
+                'vibracao_braco': [r[4] for r in resultados],
+                'timestamp': [r[0] for r in resultados]
             }
 
-            return data
 
-
-@app.route('/dados_graficos', methods=['POST'])  # Alterado para aceitar apenas POST
+@app.route('/dados_graficos', methods=['POST'])
 def dados_graficos():
     filters = request.json
-
-    time_range = filters.get('timeRange')
-    day = filters.get('day')
-    month = filters.get('month')
-    week = filters.get('week')
-    year = filters.get('year')
-    mesSemana = filters.get('monthWeek')
-
-    data = get_sensor_data(time_range, day, month, week, year, mesSemana)
-
+    data = get_sensor_data(
+        filters.get('timeRange'), filters.get('day'), filters.get('month'),
+        filters.get('week'), filters.get('year'), filters.get('monthWeek')
+    )
     return jsonify(data)
 
-# Registro de usuário
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['user']
         password = request.form['password']
-        user_existente = User.query.filter_by(username=username).first()
-        if user_existente:
-            flash('Nome de usuário já existe. Tente outro.', 'error')
+        if User.query.filter_by(username=username).first():
+            flash('Nome de usuário já existe.', 'error')
             return redirect(url_for('register'))
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, password=hashed_password)
-        db.session.add(new_user)
+        db.session.add(User(username=username, password=hashed_password))
         db.session.commit()
-        flash('Registro realizado com sucesso! Você pode fazer login agora.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
 
-
-
-
-# Rota para solicitar redefinição de senha
 
 @app.route('/esqueci_senha', methods=['GET', 'POST'])
 def esqueci_senha():
     if request.method == 'POST':
         username = request.form['username']
-        user = User.query.filter_by(username=username).first()
-        if user:
+        if User.query.filter_by(username=username).first():
             token = serializer.dumps(username, salt='senha_reset')
             return jsonify({"redirect": url_for('reset_senha', token=token, _external=True)})
-        else:
-            return jsonify({"error": "Nome de usuário não encontrado"}), 404
+        return jsonify({"error": "Usuário não encontrado"}), 404
     return render_template('esqueci_senha.html')
     
+
 @app.route('/reset_senha/<token>', methods=['GET', 'POST'])
 def reset_senha(token):
     try:
         username = serializer.loads(token, salt='senha_reset', max_age=3600)
     except:
-        flash('O token de redefinição de senha expirou.', 'error')
+        flash('O token expirou.', 'error')
         return redirect(url_for('esqueci_senha'))
 
     user = User.query.filter_by(username=username).first()
     if request.method == 'POST' and user:
-        nova_senha = request.form['nova_senha']
-        hashed_password = generate_password_hash(nova_senha)  # Removido o método sha256
-        user.password = hashed_password
+        user.password = generate_password_hash(request.form['nova_senha'], method='pbkdf2:sha256')
         db.session.commit()
-        flash('Senha atualizada com sucesso!', 'success')
-        return redirect(url_for('login'))  # Certifique-se de ter uma rota de login
-
+        return redirect(url_for('login'))
     return render_template('reset_senha.html', token=token)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('user')  # Use .get() para evitar KeyError
+        username = request.form.get('user')
         password = request.form.get('password')
-        
         user = User.query.filter_by(username=username).first()
-        
         if user and check_password_hash(user.password, password):
             session['username'] = user.username
-            session['is_admin'] = user.is_admin  # Armazena o status de admin na sessão
-            flash('Login realizado com sucesso!', 'success')
-            return redirect(url_for('dashboard'))  # Redireciona para o painel do usuário
-        else:
-            flash('Login ou senha incorretos. Tente novamente.', 'error')
-    
+            session['is_admin'] = user.is_admin
+            return redirect(url_for('dashboard'))
+        flash('Login ou senha incorretos.', 'error')
     return render_template('login.html')
+
 
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
-        flash('Você precisa estar logado para acessar o dashboard.', 'error')
-        return redirect(url_for('login'))  # Redireciona para a página de login se não estiver logado
-    
-    return render_template('dashboard.html')  # Renderiza o template do dashboard
+        return redirect(url_for('login'))
+    return render_template('dashboard.html')
+
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    if not session.get('is_admin'):  # Verifica se o usuário é admin
-        flash('Acesso negado. Você não tem permissão para acessar esta página.')
-        return redirect(url_for('dashboard'))  # Redireciona para o dashboard normal
+    if not session.get('is_admin'):
+        return redirect(url_for('dashboard'))
     return render_template('admin_dashboard.html')
 
 
-# Criação da rota para buscar usuários com filtros
-# Endpoint para obter usuários
 @app.route('/admin/users', methods=['POST'])
 def get_users():
     users = User.query.all()
-    return jsonify(users=[{'id': user.id, 'username': user.username, 'is_admin': user.is_admin} for user in users])
+    return jsonify(users=[{'id': u.id, 'username': u.username, 'is_admin': u.is_admin} for u in users])
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
 @app.route('/admin/users/<int:user_id>/make-admin', methods=['PATCH'])
 def make_admin(user_id):
     user = User.query.get(user_id)
     if user:
-        user.is_admin = True  # Promove o usuário a administrador
+        user.is_admin = True
         db.session.commit()
         return jsonify(message='Usuário promovido a admin com sucesso!'), 200
-    else:
-        return jsonify(message='Usuário não encontrado!'), 404
+    return jsonify(message='Usuário não encontrado!'), 404
 
-# Inicializando o banco de dados
-def create_tables():
-    with app.app_context():  # Cria um contexto de aplicativo
-        db.create_all()
-
-# Chame a função de criação de tabelas apenas uma vez
-create_tables()
 
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('Logout realizado com sucesso.', 'success')
     return redirect(url_for('login'))
 
 
 @app.route("/inserir_dados", methods=["POST"])
 def inserir_dados():
-    # Recebe os dados JSON
     dados = request.get_json()
-
-    # Extrai os dados do JSON
     temperatura = dados.get("temperatura")
     vibracao_base = dados.get("vibracao_base")
     corrente = dados.get("corrente")
     data_registro = dados.get("data_registro")
     vibracao_braco = dados.get("vibracao_braco")
 
-    # Conecta ao banco de dados SQLite3 e insere os dados na tabela
     with sqlite3.connect('instance/dados.db') as conn:
         cursor = conn.cursor()
-        
-        # Cria a tabela caso ainda não exista
+        # Garantido a criação da tabela correta chamada 'dados'
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS sensor_data (
+            CREATE TABLE IF NOT EXISTS dados (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 temperatura REAL,
                 vibracao_base REAL,
@@ -544,46 +329,37 @@ def inserir_dados():
                 vibracao_braco REAL
             )
         ''')
-        
-        # Insere os dados na tabela
         cursor.execute('''
             INSERT INTO dados (temperatura, vibracao_base, corrente, data_registro, vibracao_braco)
             VALUES (?, ?, ?, ?, ?)
-        ''', (temperatura, vibracao_base, corrente, data_registro, vibracao_braco))
+        ''', (temperatura, vibracao_base, corriente, data_registro, vibracao_braco))
         conn.commit()
 
-    # Imprime os dados no console do Flask e retorna uma resposta de sucesso
-    print(dados)
-    return jsonify({"status": "sucesso", "mensagem": "Dados recebidos e armazenados com sucesso!"}), 200
+    return jsonify({"status": "sucesso"}), 200
+
 
 @app.route("/braco")
-def braco():
-    return render_template("braco.html")
-@app.route("/login")
-def asd():
-    return render_template("login.html")
+def braco(): return render_template("braco.html")
+
 @app.route("/chat")
-def index():
-    return render_template("chat.html")
+def index(): return render_template("chat.html")
+
 
 @app.route("/get", methods=["GET", "POST"])
 def chat():
-    input = request.form.get("msg", "").strip()
-    if not input:
+    input_text = request.form.get("msg", "").strip()
+    if not input_text:
         return jsonify(resposta="Envie uma mensagem para continuar."), 400
 
     try:
-        if "pdf" in input.lower():
-            AI_pdf(input)
-            return jsonify(resposta="Relatório PDF gerado.", url="relatório.pdf")
-
-        resposta = AI_request(input)
+        # Corrigido: O tratamento de geração de texto de relatório/PDF agora é controlado 
+        # organicamente pela própria instrução do sistema (System Instruction da IA).
+        resposta = AI_request(input_text)
         return jsonify(resposta=resposta)
     except Exception as e:
         logger.exception("Erro na rota /get")
-        return jsonify(
-            resposta="Não foi possível obter resposta da IA. Verifique GEMINI_API_KEY no .env."
-        ), 500
+        return jsonify(resposta="Não foi possível obter resposta da IA. Verifique as chaves."), 500
+
 
 @app.route("/auto", methods=["GET"])
 def automatic_message():
@@ -591,38 +367,23 @@ def automatic_message():
         return AI_predict()
     except Exception as e:
         logger.exception("Erro na rota /auto")
-        return "Previsão indisponível: configure GEMINI_API_KEY no .env.", 500
+        return "Previsão indisponível.", 500
 
-@app.route("/pdf", methods = ["POST"])
+
+@app.route("/pdf", methods=["POST"])
 def pdf():
-    
     dados = request.get_json()
     filtros = dados.get('filters')
     leituras = dados.get('data')
-    
     return AI_pdf(filtros, leituras)
 
+
 @app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
+def page_not_found(e): return render_template('404.html'), 404
 
 @app.errorhandler(500)
-def internal_server_error(e):
-    app.logger.error(f'Server Error: {e}')
-    return render_template('500.html'), 500
+def internal_server_error(e): return render_template('500.html'), 500
 
-@app.route("/debug")
-def debug():
-    import os
-    files = os.listdir(app.template_folder)
-    template_path = os.path.join(app.template_folder, "home.html")
-    exists = os.path.exists(template_path)
-    return {
-        "template_folder": app.template_folder,
-        "files": files,
-        "home_exists": exists,
-        "template_path": template_path
-    }
 
 with app.app_context():
     db.create_all()
@@ -630,4 +391,3 @@ with app.app_context():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
     app.run(host='0.0.0.0', port=port)
- 
